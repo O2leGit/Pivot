@@ -177,7 +177,7 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
             <div className="flex items-center justify-center gap-1.5">
               <span className="text-[10px] font-semibold" style={{ color: brandColor }}>Pivot</span>
               <span className="text-[9px] text-gray-700">·</span>
-              <span className="text-[10px] text-gray-600">Property OS</span>
+              <span className="text-[10px] text-gray-600">Property Management Platform</span>
             </div>
           </div>
         )}

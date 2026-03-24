@@ -25,7 +25,19 @@ const HOUR_LABEL = (h: number) => `${h <= 12 ? h : h - 12}${h < 12 ? "am" : h ==
 const JOB_TIMES: Record<string, { date: number; startHour: number; durationHours: number }> = {
   "job-001": { date: 24, startHour: 10, durationHours: 2 },  // Mon 10am–12pm
   "job-002": { date: 25, startHour: 9,  durationHours: 3 },  // Tue 9am–12pm
+  "job-003": { date: 26, startHour: 13, durationHours: 2 },  // Wed 1pm–3pm
+  "job-004": { date: 27, startHour: 10, durationHours: 2 },  // Thu 10am–12pm
+  "job-005": { date: 28, startHour: 9,  durationHours: 2 },  // Fri 9am–11am
 };
+
+// Extra mock jobs for Wed/Thu/Fri schedule blocks (same shape as ContractorJob for calendar)
+const EXTRA_SCHEDULE_JOBS: ContractorJob[] = [
+  { id: "job-003", title: "HVAC filter + inspection", category: "hvac", accessCode: "5519", propertyName: "Bayview Lofts", propertyAddress: "501 Third St, SF", unitNumber: "B", status: "accepted", urgency: "low", estimatedPay: 180, scheduledDate: "2026-03-26", description: "Annual HVAC filter replacement and system inspection.", maintenanceRequestId: "mr-x3", propertyId: "p-3" },
+  { id: "job-004", title: "Bathroom light fixture", category: "electrical", accessCode: "3847", propertyName: "Pacific Pines Cabin", propertyAddress: "14 Redwood Trail, Guerneville", unitNumber: "Cabin", status: "accepted", urgency: "low", estimatedPay: 120, scheduledDate: "2026-03-27", description: "Replace bathroom light fixture and check wiring.", maintenanceRequestId: "mr-x4", propertyId: "p-2" },
+  { id: "job-005", title: "Kitchen faucet seal", category: "plumbing", accessCode: "9021", propertyName: "The Harlow Apartments", propertyAddress: "2840 Market St, SF", unitNumber: "302", status: "accepted", urgency: "medium", estimatedPay: 95, scheduledDate: "2026-03-28", description: "Replace worn faucet seal to stop minor drip.", maintenanceRequestId: "mr-x5", propertyId: "p-1" },
+];
+// Combined list for calendar display
+const ALL_CALENDAR_JOBS = [...CONTRACTOR_JOBS, ...EXTRA_SCHEDULE_JOBS];
 
 const JOB_COLORS: Record<string, string> = {
   plumbing:    "bg-blue-900/60 border-blue-700/60 text-blue-300",
@@ -101,12 +113,12 @@ export default function ContractorJobsPage({ currentTab, onNavigate, showToast }
                 </div>
                 {WEEK_DATES.map((day) => {
                   // Find a job that starts at this hour on this day
-                  const job = CONTRACTOR_JOBS.find(j => {
+                  const job = ALL_CALENDAR_JOBS.find(j => {
                     const t = JOB_TIMES[j.id];
                     return t && t.date === day && t.startHour === hour;
                   });
                   // Find a job continuing through this cell
-                  const continuationJob = !job ? CONTRACTOR_JOBS.find(j => {
+                  const continuationJob = !job ? ALL_CALENDAR_JOBS.find(j => {
                     const t = JOB_TIMES[j.id];
                     return t && t.date === day && t.startHour < hour && hour < t.startHour + t.durationHours;
                   }) : undefined;
@@ -163,7 +175,7 @@ export default function ContractorJobsPage({ currentTab, onNavigate, showToast }
         <div className="card">
           <h2 className="text-sm font-semibold text-white mb-3">Upcoming Jobs</h2>
           <div className="space-y-3">
-            {CALENDAR_JOBS.map(job => (
+            {[...CALENDAR_JOBS, ...EXTRA_SCHEDULE_JOBS].map(job => (
               <div
                 key={job.id}
                 onClick={() => setSelectedJob(job)}

@@ -101,22 +101,28 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
                 All paid · AutoPay active
               </p>
             )}
+            {paySuccess ? (
+              <div className="mt-4 p-4 bg-green-900/30 border border-green-700/50 rounded-xl flex items-start gap-3 animate-fade-in">
+                <div className="w-9 h-9 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-green-400">Payment Submitted!</p>
+                  <p className="text-xs text-gray-400 mt-0.5">${upcoming?.amount.toLocaleString() ?? tenant.rentAmount.toLocaleString()} scheduled for {upcoming ? new Date(upcoming.dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric" }) : "Mar 31"}</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">AutoPay confirmed · Confirmation #PAY-{Math.floor(Math.random()*90000)+10000}</p>
+                </div>
+              </div>
+            ) : (
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
               <button
                 onClick={() => {
                   setPaySuccess(true);
                   showToast("Payment submitted! Processing now…");
-                  setTimeout(() => setPaySuccess(false), 2000);
-                  setTimeout(() => onNavigate("payments"), 700);
+                  setTimeout(() => setPaySuccess(false), 3500);
                 }}
-                className={`btn-primary px-5 py-3 text-sm rounded-lg min-h-[44px] sm:py-2 flex items-center gap-2 ${paySuccess ? "animate-success-pop" : ""}`}
+                className="btn-primary px-5 py-3 text-sm rounded-lg min-h-[44px] sm:py-2 flex items-center gap-2"
               >
-                {paySuccess ? (
-                  <>
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    Submitted!
-                  </>
-                ) : "Pay Now"}
+                Pay Now
               </button>
               <button
                 onClick={() => onNavigate("payments")}
@@ -125,6 +131,7 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
                 View History
               </button>
             </div>
+            )}
           </div>
           <div className="hidden md:flex flex-col items-end gap-2">
             <div className="text-right">

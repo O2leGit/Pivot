@@ -59,6 +59,9 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
   const [newRequest, setNewRequest] = useState({ title: "", description: "", urgency: "medium", category: "other" });
   const [mockPhotos, setMockPhotos] = useState<string[]>([]);
   const [liveRequests, setLiveRequests] = useState<MaintenanceRequest[]>([]);
+  const [triagePhase, setTriagePhase] = useState<"idle" | "analyzing" | "done">("idle");
+  const [triageVisibleSteps, setTriageVisibleSteps] = useState(0);
+  const [triageData, setTriageData] = useState<{ cat: string; score: number; cost: string; contractor: string } | null>(null);
 
   const baseRequests = role === "tenant"
     ? MAINTENANCE_REQUESTS.filter((r) => r.tenantId === user.entityId)
@@ -79,6 +82,20 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
     if (!newRequest.title) { showToast("Please enter a title", "error"); return; }
     const detectedCat = detectCategory(newRequest.title + " " + newRequest.description);
     const cat = newRequest.category === "other" ? detectedCat : newRequest.category;
+    const score = newRequest.urgency === "emergency" ? 90 : newRequest.urgency === "high" ? 72 : newRequest.urgency === "medium" ? 50 : 25;
+    const COST_MAP: Record<string, string> = {
+      plumbing: "$120–$280", electrical: "$150–$400", hvac: "$200–$600",
+      appliance: "$100–$350", structural: "$80–$250", pest: "$120–$300", other: "$75–$200",
+    };
+    const CONTRACTOR_MAP: Record<string, string> = {
+      plumbing: "Jake Torres · 4.9★ Plumber",
+      electrical: "Maria Santos · 4.8★ Electrician",
+      hvac: "Dave Kim · 4.7★ HVAC Tech",
+      appliance: "Jake Torres · 4.9★ General",
+      structural: "Jake Torres · 4.9★ General",
+      pest: "PestPro Services · 4.6★",
+      other: "Jake Torres · 4.9★ General",
+    };
     const newReq: MaintenanceRequest = {
       id: `mr-live-${Date.now()}`,
       propertyId: "p-1",
@@ -92,13 +109,26 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
       submittedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       aiTriageSummary: AI_TRIAGE_SUMMARIES[cat] ?? AI_TRIAGE_SUMMARIES.other,
-      aiUrgencyScore: newRequest.urgency === "emergency" ? 90 : newRequest.urgency === "high" ? 72 : newRequest.urgency === "medium" ? 50 : 25,
+      aiUrgencyScore: score,
     };
-    setLiveRequests((prev) => [newReq, ...prev]);
-    showToast("Request submitted! AI triaging now…");
-    setShowNewForm(false);
-    setNewRequest({ title: "", description: "", urgency: "medium", category: "other" });
-    setMockPhotos([]);
+    setTriageData({ cat, score, cost: COST_MAP[cat] ?? "$75–$200", contractor: CONTRACTOR_MAP[cat] ?? "Jake Torres · 4.9★ General" });
+    setTriagePhase("analyzing");
+    setTriageVisibleSteps(0);
+    // Reveal each step with a delay
+    [500, 1100, 1700, 2300].forEach((delay, i) => {
+      setTimeout(() => setTriageVisibleSteps(i + 1), delay);
+    });
+    // Add request to list + close
+    setTimeout(() => setLiveRequests((prev) => [newReq, ...prev]), 2500);
+    setTimeout(() => {
+      setShowNewForm(false);
+      setTriagePhase("idle");
+      setTriageData(null);
+      setTriageVisibleSteps(0);
+      setNewRequest({ title: "", description: "", urgency: "medium", category: "other" });
+      setMockPhotos([]);
+      showToast("Request submitted — AI triage complete ✓");
+    }, 3400);
   };
 
   return (
@@ -208,8 +238,10 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
         <div className="modal-overlay" onClick={() => setShowNewForm(false)}>
           <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="text-lg font-semibold text-white">Submit Maintenance Request</h2>
-              <button onClick={() => setShowNewForm(false)} className="btn-ghost">✕</button>
+              <h2 className="text-lg font-semibold text-white">
+                {triagePhase !== "idle" ? "AI Triage in Progress" : "Submit Maintenance Request"}
+              </h2>
+              {triagePhase === "idle" && <button onClick={() => setShowNewForm(false)} className="btn-ghost">✕</button>}
             </div>
             <div className="modal-body space-y-4">
               <div>
@@ -271,8 +303,18 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
                 </div>
               </div>
               <div className="p-3 bg-teal-900/20 border border-teal-700/30 rounded-lg">
-                <p className="text-xs text-teal-300 font-medium mb-1">AI Triage</p>
-                <p className="text-xs text-gray-400">After submission, our AI will automatically assess urgency, estimate costs, and match the best available contractor from our vetted pool.</p>
+                <p className="text-xs text-teal-300 font-medium mb-1 flex items-center gap-1.5">
+                  <span>⚡</span> AI Triage — Live Preview
+                </p>
+                {newRequest.title ? (
+                  <div className="space-y-1 text-xs text-gray-300">
+                    <div className="flex items-center gap-2"><span className="text-teal-400">✓</span> Category: <span className="font-medium capitalize">{newRequest.category}</span></div>
+                    <div className="flex items-center gap-2"><span className="text-teal-400">✓</span> Urgency: <span className={`font-medium ${newRequest.urgency === "emergency" || newRequest.urgency === "high" ? "text-amber-400" : "text-gray-300"}`}>{newRequest.urgency}</span></div>
+                    <div className="flex items-center gap-2"><span className="text-gray-600">→</span> On submit: cost estimate + contractor match</div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500">Type a title above to see AI analysis preview…</p>
+                )}
               </div>
               {/* Photo upload */}
               <div>
@@ -305,10 +347,46 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
                   </div>
                 )}
               </div>
+            {triagePhase !== "idle" && triageData ? (
+              <div className="py-4 space-y-3">
+                {[
+                  { icon: "🔍", label: "Analyzing description", value: `${triageData.cat.charAt(0).toUpperCase() + triageData.cat.slice(1)} issue detected` },
+                  { icon: "⚡", label: "Urgency assessment", value: `Score ${triageData.score}/100${triageData.score >= 70 ? " — High priority" : " — Medium priority"}` },
+                  { icon: "💰", label: "Cost estimation", value: `Est. ${triageData.cost}` },
+                  { icon: "👷", label: "Contractor matched", value: triageData.contractor },
+                ].map((step, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-500 ${
+                      triageVisibleSteps > i
+                        ? "bg-teal-900/20 border-teal-700/40 opacity-100 translate-x-0"
+                        : "opacity-0 -translate-x-2 border-transparent"
+                    }`}
+                    style={{ transitionDelay: `${i * 50}ms` }}
+                  >
+                    <span className="text-lg">{step.icon}</span>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500">{step.label}</p>
+                      <p className="text-sm font-medium text-white">{step.value}</p>
+                    </div>
+                    {triageVisibleSteps > i && (
+                      <svg className="w-4 h-4 text-teal-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    )}
+                  </div>
+                ))}
+                {triageVisibleSteps >= 4 && (
+                  <div className="flex items-center justify-center gap-2 pt-2 text-sm text-teal-400 font-medium">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Request routed — added to your list
+                  </div>
+                )}
+              </div>
+            ) : (
               <div className="flex gap-3">
                 <button onClick={handleSubmitRequest} className="btn-primary flex-1">Submit Request</button>
                 <button onClick={() => setShowNewForm(false)} className="btn-secondary">Cancel</button>
               </div>
+            )}
             </div>
           </div>
         </div>

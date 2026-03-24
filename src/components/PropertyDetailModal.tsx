@@ -103,6 +103,9 @@ const LOCATION_BY_UNIT: Record<string, string> = {
 export default function PropertyDetailModal({ property, onClose, showToast }: Props) {
   const [mode, setMode] = useState(property.mode);
   const [modeChanging, setModeChanging] = useState(false);
+  const [cascadeVisible, setCascadeVisible] = useState(false);
+  const [cascadeStep, setCascadeStep] = useState(0);
+  const [pendingMode, setPendingMode] = useState<string | null>(null);
 
   const units = UNITS.filter((u) => u.propertyId === property.id);
   const iotEvents = IOT_EVENTS.filter((e) => e.propertyId === property.id);
@@ -120,13 +123,27 @@ export default function PropertyDetailModal({ property, onClose, showToast }: Pr
   };
 
   const handleModeToggle = () => {
+    const next = mode === "LTR" ? "STR" : mode === "STR" ? "mixed" : "LTR";
+    setPendingMode(next);
     setModeChanging(true);
+    setCascadeStep(0);
+    // Brief delay then show cascade
     setTimeout(() => {
-      const next = mode === "LTR" ? "STR" : mode === "STR" ? "mixed" : "LTR";
       setMode(next);
       setModeChanging(false);
-      showToast(`${property.name} switched to ${next} mode`);
-    }, 600);
+      setCascadeVisible(true);
+    }, 500);
+    // Reveal each cascade step
+    [700, 1200, 1700, 2200, 2700, 3200].forEach((delay, i) => {
+      setTimeout(() => setCascadeStep(i + 1), delay);
+    });
+    // Hide cascade after all steps
+    setTimeout(() => {
+      setCascadeVisible(false);
+      setCascadeStep(0);
+      setPendingMode(null);
+      showToast(`${property.name} switched to ${next} mode — 6 actions completed`);
+    }, 4200);
   };
 
   return (
@@ -180,6 +197,40 @@ export default function PropertyDetailModal({ property, onClose, showToast }: Pr
               <span className="text-xs text-gray-400">{mode === "LTR" ? "→ STR" : mode === "STR" ? "→ Mixed" : "→ LTR"}</span>
             </div>
           </div>
+
+          {/* Mode switch cascade animation */}
+          {cascadeVisible && pendingMode && (
+            <div className="p-4 bg-navy-900/70 border border-teal-700/40 rounded-xl space-y-2">
+              <p className="text-xs font-semibold text-teal-300 mb-3 flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                Switching to {pendingMode} — automated actions
+              </p>
+              {[
+                { icon: "💵", label: "Pricing model updated", value: pendingMode === "STR" ? "Dynamic nightly → $285/night" : "Fixed monthly → $3,400/mo" },
+                { icon: "📅", label: pendingMode === "STR" ? "STR calendar activated" : "STR calendar paused", value: pendingMode === "STR" ? "Availability open for bookings" : "No new bookings accepted" },
+                { icon: "💬", label: pendingMode === "STR" ? "Guest messaging enabled" : "Guest messaging paused", value: pendingMode === "STR" ? "Auto-responses activated" : "Tenant communication mode" },
+                { icon: "📋", label: pendingMode === "LTR" ? "Lease workflow activated" : "STR listing activated", value: pendingMode === "LTR" ? "12-month template ready to send" : "Listing pushed to channels" },
+                { icon: "🔐", label: "Smart lock access updated", value: pendingMode === "STR" ? "Per-booking codes enabled" : "Tenant code assigned" },
+                { icon: "📧", label: "Owner notification sent", value: "Mode switch summary emailed" },
+              ].map((step, i) => (
+                <div
+                  key={i}
+                  className={`flex items-center gap-3 transition-all duration-400 ${
+                    cascadeStep > i ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <span className="text-base w-5 text-center">{step.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs text-gray-300">{step.label}</span>
+                    <span className="text-xs text-gray-500 ml-1.5">— {step.value}</span>
+                  </div>
+                  {cascadeStep > i && (
+                    <svg className="w-3.5 h-3.5 text-teal-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Seasonal schedule */}
           {(mode === "mixed" || mode === "STR") && (
