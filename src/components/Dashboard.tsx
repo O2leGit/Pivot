@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PortalRole, DemoUser } from "@/types";
 import Sidebar from "./Sidebar";
+import MobileNav from "./MobileNav";
 import ChatPanel from "./ChatPanel";
 import DashboardHome from "./DashboardHome";
 import PropertiesPage from "./PropertiesPage";
@@ -27,16 +28,13 @@ interface DashboardProps {
 }
 
 export type Page =
-  // shared
   | "dashboard" | "maintenance" | "payments" | "messages"
-  // tenant
   | "lease"
-  // owner
   | "properties" | "tenants" | "invoices" | "pl"
-  // contractor
   | "jobs" | "schedule" | "completion"
-  // admin
   | "accounts" | "vetting" | "disputes" | "settings" | "audit-log";
+
+const MOBILE_NAV_ROLES: PortalRole[] = ["tenant", "contractor"];
 
 export default function Dashboard({ role, user, onLogout, onLoginAs }: DashboardProps) {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
@@ -54,6 +52,8 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
     if (message) setChatInitialMessage(message);
     setChatOpen(true);
   };
+
+  const hasMobileNav = MOBILE_NAV_ROLES.includes(role);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -95,25 +95,39 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar
-        role={role}
-        user={user}
-        currentPage={currentPage}
-        onNavigate={(p) => setCurrentPage(p as Page)}
-        onLogout={onLogout}
-      />
+      {/* Sidebar — hidden on mobile for tenant/contractor */}
+      <div className={hasMobileNav ? "hidden md:block" : ""}>
+        <Sidebar
+          role={role}
+          user={user}
+          currentPage={currentPage}
+          onNavigate={(p) => setCurrentPage(p as Page)}
+          onLogout={onLogout}
+        />
+      </div>
 
-      <main className={`flex-1 overflow-y-auto transition-all duration-200 ${chatOpen ? "mr-[380px]" : ""}`}>
-        <div className="p-6 max-w-7xl mx-auto">
+      {/* Main content */}
+      <main className={`flex-1 overflow-y-auto transition-all duration-200 ${chatOpen ? "md:mr-[380px]" : ""}`}>
+        <div className={`p-4 md:p-6 max-w-7xl mx-auto ${hasMobileNav ? "pb-24 md:pb-6" : ""}`}>
           {renderPage()}
         </div>
       </main>
 
-      {/* Chat toggle button */}
+      {/* Mobile bottom nav — tenant + contractor only */}
+      {hasMobileNav && (
+        <MobileNav
+          role={role}
+          currentPage={currentPage}
+          onNavigate={(p) => setCurrentPage(p as Page)}
+          onOpenChat={() => setChatOpen(true)}
+        />
+      )}
+
+      {/* AI chat toggle button — hidden on mobile when bottom nav present */}
       {!chatOpen && (
         <button
           onClick={() => setChatOpen(true)}
-          className="fixed right-4 bottom-4 text-white rounded-full shadow-lg z-50 transition-all flex items-center gap-2 px-4 py-3 hover:scale-105 animate-ai-pulse"
+          className={`fixed right-4 bottom-4 text-white rounded-full shadow-lg z-50 transition-all flex items-center gap-2 px-4 py-3 hover:scale-105 animate-ai-pulse ${hasMobileNav ? "hidden md:flex" : "flex"}`}
           style={{ background: "linear-gradient(135deg, #0D9488 0%, #0891B2 100%)" }}
           title="Ask Pivot AI"
         >
@@ -124,7 +138,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
         </button>
       )}
 
-      {/* Chat panel */}
+      {/* Chat panel — full-screen overlay on mobile, side panel on desktop */}
       {chatOpen && (
         <ChatPanel
           role={role}
@@ -138,7 +152,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
       )}
 
       {/* Toast notifications */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none">
+      <div className={`fixed z-[100] flex flex-col gap-2 pointer-events-none ${hasMobileNav ? "bottom-20 right-4 md:bottom-6 md:right-6" : "bottom-6 right-6"}`}>
         {toasts.map((toast) => (
           <div
             key={toast.id}

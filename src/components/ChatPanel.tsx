@@ -99,7 +99,7 @@ function renderMarkdown(text: string): string {
 export default function ChatPanel({ role, currentPage, initialMessage, onInitialMessageSent, onClose }: ChatPanelProps) {
   const WELCOME = `I'm your AI property assistant. I can help with **maintenance triage**, **rent pricing**, **tenant screening**, and **portfolio analysis**. What would you like to know?`;
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: "welcome", role: "assistant", content: WELCOME, timestamp: new Date().toISOString() },
+    { id: "welcome", role: "assistant", content: WELCOME, timestamp: "2026-03-23T08:00:00.000Z" },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -171,7 +171,7 @@ export default function ChatPanel({ role, currentPage, initialMessage, onInitial
   };
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-[380px] bg-navy-900 border-l border-navy-700 flex flex-col z-40 animate-slide-in-right">
+    <div className="fixed inset-0 md:inset-auto md:right-0 md:top-0 md:bottom-0 md:w-[380px] bg-navy-900 border-l border-navy-700 flex flex-col z-40 animate-slide-in-right">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-navy-700">
         <div className="flex items-center gap-2.5">

@@ -82,16 +82,26 @@
     @apply text-xs text-red-400 font-medium;
   }
   .modal-overlay {
-    @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+    @apply fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end md:items-center justify-center md:p-4;
   }
   .modal-panel {
-    @apply bg-navy-800 rounded-2xl border border-navy-700 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto;
+    @apply bg-navy-800 border border-navy-700 shadow-2xl w-full overflow-y-auto;
+    /* Full-screen sheet on mobile, centered card on desktop */
+    border-radius: 1.25rem 1.25rem 0 0;
+    max-height: 92vh;
+  }
+  @media (min-width: 768px) {
+    .modal-panel {
+      border-radius: 1rem;
+      max-width: 42rem;
+      max-height: 90vh;
+    }
   }
   .modal-header {
-    @apply flex items-center justify-between p-6 border-b border-navy-700;
+    @apply flex items-center justify-between p-5 border-b border-navy-700;
   }
   .modal-body {
-    @apply p-6;
+    @apply p-5;
   }
   .divider {
     @apply border-t border-navy-700 my-4;

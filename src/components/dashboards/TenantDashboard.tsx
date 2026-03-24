@@ -67,7 +67,7 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
           <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-teal-400" />
           <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-blue-400" />
         </div>
-        <div className="relative flex items-start justify-between">
+        <div className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
               {tenant.paymentStatus === "paid" ? "Last Payment" : "Rent Due"}
@@ -93,16 +93,16 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
                 All paid · AutoPay active
               </p>
             )}
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
               <button
                 onClick={() => { onNavigate("payments"); showToast("Redirecting to payments…"); }}
-                className="btn-primary px-5 py-2 text-sm rounded-lg"
+                className="btn-primary px-5 py-3 text-sm rounded-lg min-h-[44px] sm:py-2"
               >
                 Pay Now
               </button>
               <button
                 onClick={() => onNavigate("payments")}
-                className="btn-secondary px-4 py-2 text-sm rounded-lg"
+                className="btn-secondary px-4 py-2.5 text-sm rounded-lg min-h-[44px] sm:py-2"
               >
                 View History
               </button>
