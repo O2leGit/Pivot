@@ -137,7 +137,7 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-navy-700">
+      <div className="p-3 border-t border-navy-700 space-y-1">
         {expanded && (
           <div className="mb-2">
             <div className="text-xs font-medium text-white truncate">{user.name}</div>
@@ -146,13 +146,13 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
         )}
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 py-2 text-sm text-red-400/70 hover:text-red-400 transition-colors"
-          title={!expanded ? "Sign out" : undefined}
+          className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm bg-navy-800 hover:bg-navy-700 text-gray-300 hover:text-white transition-all border border-navy-700 hover:border-navy-600"
+          title={!expanded ? "Back to portal select" : undefined}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h8" />
           </svg>
-          {expanded && <span>Switch Portal</span>}
+          {expanded && <span className="text-xs font-medium">All Portals</span>}
         </button>
       </div>
     </div>

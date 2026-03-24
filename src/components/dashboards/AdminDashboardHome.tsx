@@ -1,16 +1,18 @@
 "use client";
 
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import type { PortalRole } from "@/types";
 import type { Page } from "../Dashboard";
 import { ADMIN_METRICS, ADMIN_MRR_TREND, DISPUTES, MAINTENANCE_REQUESTS, ACCOUNT_RECORDS, IOT_EVENTS } from "@/data/demoData";
 
 interface Props {
   onNavigate: (page: Page) => void;
+  onLoginAs?: (role: PortalRole) => void;
 }
 
 const CHART_COLORS = { teal: "#0D9488", purple: "#8B5CF6", amber: "#F59E0B", red: "#EF4444" };
 
-export default function AdminDashboardHome({ onNavigate }: Props) {
+export default function AdminDashboardHome({ onNavigate, onLoginAs }: Props) {
   const openDisputes = DISPUTES.filter((d) => d.status !== "resolved").length;
   const openMaintenance = MAINTENANCE_REQUESTS.filter((r) => !["completed", "cancelled"].includes(r.status)).length;
   const criticalIoT = IOT_EVENTS.filter((e) => !e.resolved && e.severity === "critical").length;
@@ -142,6 +144,34 @@ export default function AdminDashboardHome({ onNavigate }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Client Access */}
+        {onLoginAs && (
+          <div className="card">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-white">Login As Client</h2>
+              <span className="text-[10px] text-gray-500 bg-navy-900 border border-navy-700 rounded-full px-2 py-0.5">Full visibility</span>
+            </div>
+            <div className="space-y-2">
+              {[
+                { label: "Marcus Rivera", sub: "Partner · 3 properties", role: "owner" as PortalRole, initials: "MR", color: "from-blue-500 to-indigo-600", badge: "bg-blue-900/40 text-blue-300 border-blue-700/40 hover:bg-blue-900/70" },
+                { label: "Sarah Chen", sub: "Tenant · Harlow Apt Unit 101", role: "tenant" as PortalRole, initials: "SC", color: "from-teal-600 to-cyan-600", badge: "bg-teal-900/40 text-teal-300 border-teal-700/40 hover:bg-teal-900/70" },
+                { label: "Jake Torres", sub: "Contractor · Plumber", role: "contractor" as PortalRole, initials: "JT", color: "from-amber-500 to-orange-600", badge: "bg-amber-900/40 text-amber-300 border-amber-700/40 hover:bg-amber-900/70" },
+              ].map((c) => (
+                <div key={c.role} className="flex items-center gap-2.5 p-2.5 bg-navy-900/50 rounded-lg border border-navy-700/50">
+                  <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${c.color} flex items-center justify-center text-white text-[10px] font-bold shrink-0`}>{c.initials}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-200">{c.label}</p>
+                    <p className="text-[10px] text-gray-500">{c.sub}</p>
+                  </div>
+                  <button onClick={() => onLoginAs(c.role)} className={`text-[10px] px-2 py-1 rounded-md border transition-colors shrink-0 ${c.badge}`}>
+                    Login As →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* IoT Alerts */}
         <div className="card">

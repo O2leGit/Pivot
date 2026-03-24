@@ -1,7 +1,7 @@
 "use client";
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import type { DemoUser } from "@/types";
+import type { DemoUser, PortalRole } from "@/types";
 import type { Page } from "../Dashboard";
 import { PROPERTIES, MAINTENANCE_REQUESTS, TENANTS, PL_DATA_P1, PL_DATA_P2, PL_DATA_P3 } from "@/data/demoData";
 
@@ -9,11 +9,12 @@ interface Props {
   user: DemoUser;
   onNavigate: (page: Page) => void;
   onOpenChat: (msg?: string) => void;
+  onLoginAs?: (role: PortalRole) => void;
 }
 
 const CHART_COLORS = { teal: "#0D9488", blue: "#3B82F6", amber: "#F59E0B", red: "#EF4444" };
 
-export default function OwnerDashboard({ onNavigate, onOpenChat }: Props) {
+export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Props) {
   const properties = PROPERTIES.filter((p) => p.ownerId === "o-1");
   const allUnits = properties.reduce((s, p) => s + p.totalUnits, 0);
   const occupiedUnits = properties.reduce((s, p) => s + p.occupiedUnits, 0);
@@ -200,6 +201,50 @@ export default function OwnerDashboard({ onNavigate, onOpenChat }: Props) {
           ))}
         </div>
       </div>
+
+      {/* Client Portal Access */}
+      {onLoginAs && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white">Client Portal Access</h2>
+            <span className="text-[10px] text-gray-500 bg-navy-900 border border-navy-700 rounded-full px-2 py-0.5">One-click login as client</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Tenant logins */}
+            {TENANTS.slice(0, 4).map((t) => (
+              <div key={t.id} className="flex items-center gap-3 p-3 bg-navy-800 rounded-lg border border-navy-700">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {t.name.split(" ").map(n => n[0]).join("")}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white font-medium truncate">{t.name}</p>
+                  <p className="text-xs text-gray-500">Unit {t.unitId.replace("u-", "")} · Tenant</p>
+                </div>
+                <button
+                  onClick={() => onLoginAs("tenant")}
+                  className="text-xs px-2.5 py-1 rounded-lg bg-teal-900/40 text-teal-300 border border-teal-700/40 hover:bg-teal-900/70 transition-colors shrink-0"
+                >
+                  Login As →
+                </button>
+              </div>
+            ))}
+            {/* Contractor login */}
+            <div className="flex items-center gap-3 p-3 bg-navy-800 rounded-lg border border-navy-700">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">JT</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-white font-medium">Jake Torres</p>
+                <p className="text-xs text-gray-500">Plumber · Contractor</p>
+              </div>
+              <button
+                onClick={() => onLoginAs("contractor")}
+                className="text-xs px-2.5 py-1 rounded-lg bg-amber-900/40 text-amber-300 border border-amber-700/40 hover:bg-amber-900/70 transition-colors shrink-0"
+              >
+                Login As →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pending Approvals alert */}
       {pendingApprovals > 0 && (

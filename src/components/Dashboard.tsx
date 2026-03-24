@@ -23,6 +23,7 @@ interface DashboardProps {
   role: PortalRole;
   user: DemoUser;
   onLogout: () => void;
+  onLoginAs?: (role: PortalRole) => void;
 }
 
 export type Page =
@@ -37,7 +38,7 @@ export type Page =
   // admin
   | "accounts" | "vetting" | "disputes" | "settings" | "audit-log";
 
-export default function Dashboard({ role, user, onLogout }: DashboardProps) {
+export default function Dashboard({ role, user, onLogout, onLoginAs }: DashboardProps) {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
@@ -57,7 +58,7 @@ export default function Dashboard({ role, user, onLogout }: DashboardProps) {
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
-        return <DashboardHome role={role} user={user} onNavigate={(p) => setCurrentPage(p as Page)} onOpenChat={handleOpenChat} showToast={showToast} />;
+        return <DashboardHome role={role} user={user} onNavigate={(p) => setCurrentPage(p as Page)} onOpenChat={handleOpenChat} showToast={showToast} onLoginAs={onLoginAs} />;
       case "properties":
         return <PropertiesPage role={role} onNavigate={(p) => setCurrentPage(p as Page)} showToast={showToast} />;
       case "maintenance":

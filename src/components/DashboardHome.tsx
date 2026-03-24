@@ -13,18 +13,19 @@ interface DashboardHomeProps {
   onNavigate: (page: Page) => void;
   onOpenChat: (message?: string) => void;
   showToast: (message: string, type?: "success" | "error") => void;
+  onLoginAs?: (role: PortalRole) => void;
 }
 
-export default function DashboardHome({ role, user, onNavigate, onOpenChat, showToast }: DashboardHomeProps) {
+export default function DashboardHome({ role, user, onNavigate, onOpenChat, showToast, onLoginAs }: DashboardHomeProps) {
   switch (role) {
     case "tenant":
       return <TenantDashboard user={user} onNavigate={onNavigate} onOpenChat={onOpenChat} showToast={showToast} />;
     case "owner":
-      return <OwnerDashboard user={user} onNavigate={onNavigate} onOpenChat={onOpenChat} />;
+      return <OwnerDashboard user={user} onNavigate={onNavigate} onOpenChat={onOpenChat} onLoginAs={onLoginAs} />;
     case "contractor":
       return <ContractorDashboard user={user} onNavigate={onNavigate} />;
     case "admin":
-      return <AdminDashboardHome onNavigate={onNavigate} />;
+      return <AdminDashboardHome onNavigate={onNavigate} onLoginAs={onLoginAs} />;
     default:
       return null;
   }
