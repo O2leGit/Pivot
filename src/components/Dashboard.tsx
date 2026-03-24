@@ -110,6 +110,19 @@ export default function Dashboard({ role, user, onLogout, onLoginAs, tourActive 
 
   useEffect(() => { setShowTour(tourActive); setTourStep(0); }, [tourActive]);
 
+  // Dynamic browser tab title per portal
+  const PORTAL_TITLES: Record<string, string> = {
+    tenant: "Pivot | Tenant Portal",
+    owner: "Pivot | Owner Portal",
+    contractor: "Pivot | Contractor Portal",
+    admin: "Pivot | Admin Portal",
+  };
+  useEffect(() => {
+    document.title = PORTAL_TITLES[role] ?? "Pivot | Property Management Platform";
+    return () => { document.title = "Pivot | Property Management Platform"; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role]);
+
   const navigateTo = (page: string) => {
     setPageLoading(true);
     setTimeout(() => {
@@ -205,7 +218,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs, tourActive 
       {!chatOpen && (
         <button
           onClick={() => setChatOpen(true)}
-          className={`fixed right-4 bottom-4 text-white rounded-full shadow-lg z-50 transition-all flex items-center gap-2 px-4 py-3 hover:scale-105 animate-ai-pulse ${hasMobileNav ? "hidden md:flex" : "flex"}`}
+          className={`fixed right-5 bottom-6 text-white rounded-full shadow-xl shadow-black/30 z-50 transition-all flex items-center gap-2 px-4 py-3 hover:scale-105 hover:shadow-teal-900/50 animate-ai-pulse ${hasMobileNav ? "hidden md:flex" : "flex"}`}
           style={{ background: "linear-gradient(135deg, #0D9488 0%, #0891B2 100%)" }}
           title="Ask Pivot AI"
         >

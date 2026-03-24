@@ -59,7 +59,7 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
     <div className="space-y-6 animate-fade-in">
       {/* Greeting */}
       <div>
-        <h1 className="text-xl font-bold text-white">Good morning, {tenant.name.split(" ")[0]} 👋</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Good morning, {tenant.name.split(" ")[0]} 👋</h1>
         <p className="text-sm text-gray-400 mt-0.5">Unit 101 · The Harlow Apartments · 2840 Market St, SF</p>
       </div>
 

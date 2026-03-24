@@ -146,12 +146,12 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
               onClick={() => { onNavigate(item.id); if (isMobile) setExpanded(false); }}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
-              className={`sidebar-nav-item relative w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-150 border-r-[3px] ${
+              className={`sidebar-nav-item relative w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-150 border-l-[3px] ${
                 isActive
-                  ? "bg-navy-700/70 text-white font-medium"
-                  : "text-gray-400 hover:text-gray-100 hover:bg-navy-800/60 border-transparent"
+                  ? "bg-navy-700/60 text-white font-medium"
+                  : "text-gray-400 hover:text-gray-100 hover:bg-navy-800/60 border-l-transparent"
               }`}
-              style={isActive ? { color: brandColor, borderColor: brandColor } : undefined}
+              style={isActive ? { color: brandColor, borderLeftColor: brandColor } : undefined}
             >
               <span className="flex-shrink-0 transition-transform duration-150" style={isActive ? { color: brandColor } : undefined}>{item.icon}</span>
               {expanded && <span className="truncate">{item.label}</span>}

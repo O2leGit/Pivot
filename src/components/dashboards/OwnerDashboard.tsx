@@ -54,7 +54,7 @@ export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Pr
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">Portfolio Overview</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Portfolio Overview</h1>
           <p className="text-sm text-gray-400 mt-0.5">Marcus Rivera · 3 properties · {allUnits} units</p>
         </div>
         <button
@@ -110,9 +110,9 @@ export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Pr
           <div className="text-xs text-gray-500">maintenance surveys</div>
         </div>
         <div className="kpi-card cursor-pointer hover:border-navy-600 transition-colors" onClick={() => onNavigate("pl")}>
-          <div className="kpi-label">2025 Tax Docs</div>
+          <div className="kpi-label">Tax Docs</div>
           <div className="kpi-value text-green-400 text-base font-semibold">Ready</div>
-          <div className="text-xs text-teal-400">1099 data available</div>
+          <div className="text-xs text-teal-400">2025 data available</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Insurance</div>

@@ -204,7 +204,7 @@ export default function Home() {
                   onClick={() => handleQuickLogin(btn.role)}
                   disabled={!!quickLogging}
                   aria-label={`Log in as ${btn.label}`}
-                  className={`flex items-center gap-3 p-3.5 rounded-xl border border-navy-700 bg-navy-900 ${btn.hover} hover:bg-navy-800 transition-all group disabled:opacity-50 text-left`}
+                  className={`flex items-center gap-3 p-3.5 rounded-xl border border-navy-700 bg-navy-900 ${btn.hover} hover:bg-navy-800 hover:scale-[1.02] hover:shadow-lg transition-all duration-200 group disabled:opacity-50 text-left`}
                 >
                   <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${btn.from} ${btn.to} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
                     {quickLogging === btn.role ? (
@@ -225,9 +225,16 @@ export default function Home() {
 
           {/* Feature chips */}
           <div className="flex flex-wrap gap-1.5 justify-center">
-            {["AI Maintenance Triage", "AutoPay", "STR/LTR Switching", "Dynamic Pricing", "Smart Lock Integration"].map((chip) => (
-              <span key={chip} className="text-[10px] bg-navy-800 border border-navy-700 text-gray-400 px-2.5 py-1 rounded-full">
-                {chip}
+            {[
+              { label: "AI Maintenance Triage", icon: "🔧" },
+              { label: "AutoPay", icon: "💳" },
+              { label: "STR/LTR Switching", icon: "🔄" },
+              { label: "Dynamic Pricing", icon: "📈" },
+              { label: "Smart Lock Integration", icon: "🔐" },
+            ].map((chip) => (
+              <span key={chip.label} className="flex items-center gap-1 text-[10px] bg-navy-800/80 border border-navy-600/60 text-gray-300 px-2.5 py-1 rounded-full hover:border-navy-500 hover:text-gray-200 transition-colors">
+                <span>{chip.icon}</span>
+                {chip.label}
               </span>
             ))}
           </div>

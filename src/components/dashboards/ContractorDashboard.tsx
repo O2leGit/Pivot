@@ -54,7 +54,7 @@ export default function ContractorDashboard({ user, onNavigate }: Props) {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold text-white">Welcome back, {contractor.name.split(" ")[0]}</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Welcome back, {contractor.name.split(" ")[0]}</h1>
             {isPreferred && (
               <span className="flex items-center gap-1 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full px-2 py-0.5">
                 ⭐ Preferred Contractor
@@ -100,12 +100,16 @@ export default function ContractorDashboard({ user, onNavigate }: Props) {
             <p className="text-xs text-gray-500 mb-1">Your Rating</p>
             <div className="flex items-baseline gap-1">
               <p className="text-2xl font-bold text-white">{contractor.rating}</p>
-              <span className="text-yellow-400 text-sm">★</span>
+              <span className="text-yellow-400 text-base">★</span>
             </div>
             <div className="flex gap-0.5 mt-1">
-              {[1,2,3,4,5].map(s => (
-                <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= Math.round(contractor.rating) ? "bg-amber-400" : "bg-navy-700"}`} />
-              ))}
+              {[1,2,3,4,5].map(s => {
+                const filled = s <= Math.floor(contractor.rating);
+                const half = !filled && s === Math.ceil(contractor.rating) && contractor.rating % 1 >= 0.5;
+                return (
+                  <span key={s} className={`text-sm leading-none ${filled ? "text-amber-400" : half ? "text-amber-300" : "text-navy-600"}`}>★</span>
+                );
+              })}
             </div>
           </div>
         </div>
