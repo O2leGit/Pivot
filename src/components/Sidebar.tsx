@@ -93,28 +93,52 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
       onMouseEnter={() => { if (!isMobile) setExpanded(true); }}
       onMouseLeave={() => { if (!isMobile) setExpanded(false); }}
     >
-      {/* Logo */}
-      <div className="p-3 border-b border-navy-700 h-14 flex items-center">
+      {/* Logo header */}
+      <div className="border-b border-navy-700 flex items-center" style={{ minHeight: "64px" }}>
         {expanded ? (
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-md" style={{ background: `linear-gradient(135deg, ${brandColor} 0%, #0891B2 100%)` }}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-            </div>
-            <div className="overflow-hidden">
-              <div className="text-sm font-bold text-white leading-tight">Pivot</div>
+          <div className="flex items-center gap-2.5 px-3 py-2 w-full overflow-hidden">
+            {role !== "admin" ? (
+              <img src="/filter-pros-logo.png" alt="Filter Pros" className="h-9 w-auto shrink-0" />
+            ) : (
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-md" style={{ background: `linear-gradient(135deg, ${brandColor} 0%, #0891B2 100%)` }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+            )}
+            <div className="overflow-hidden min-w-0">
+              <div className="text-sm font-bold text-white leading-tight truncate">
+                {role !== "admin" ? "Filter Pros, LLC" : "Pivot"}
+              </div>
               <div className="text-[10px] text-gray-500">{ROLE_LABELS[role]} Portal</div>
             </div>
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md mx-auto" style={{ background: `linear-gradient(135deg, ${brandColor} 0%, #0891B2 100%)` }}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
+          <div className="w-full flex items-center justify-center py-3">
+            {role !== "admin" ? (
+              <img src="/filter-pros-logo.png" alt="Filter Pros" className="h-8 w-8 object-contain rounded" />
+            ) : (
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md" style={{ background: `linear-gradient(135deg, ${brandColor} 0%, #0891B2 100%)` }}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Back to portals — always visible */}
+      <button
+        onClick={onLogout}
+        title="Back to portal select"
+        className="flex items-center gap-2.5 px-3 py-2.5 text-xs text-gray-400 hover:text-white hover:bg-navy-800 transition-colors border-b border-navy-800 w-full"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        {expanded && <span className="font-medium">Switch Portal</span>}
+      </button>
 
       {/* Nav items */}
       <nav className="flex-1 py-2 overflow-y-auto">
@@ -144,16 +168,6 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
             <div className="text-[10px] text-gray-500 truncate">{user.email}</div>
           </div>
         )}
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm bg-navy-800 hover:bg-navy-700 text-gray-300 hover:text-white transition-all border border-navy-700 hover:border-navy-600"
-          title={!expanded ? "Back to portal select" : undefined}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h8" />
-          </svg>
-          {expanded && <span className="text-xs font-medium">All Portals</span>}
-        </button>
 
         {/* Branding */}
         {expanded && (
