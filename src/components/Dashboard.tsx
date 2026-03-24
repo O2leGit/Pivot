@@ -19,6 +19,7 @@ import AuditLogPage from "./AuditLogPage";
 import SettingsPage from "./SettingsPage";
 import LeasePage from "./LeasePage";
 import MessagesPage from "./MessagesPage";
+import FeaturesPage from "./FeaturesPage";
 
 interface DashboardProps {
   role: PortalRole;
@@ -32,7 +33,8 @@ export type Page =
   | "lease"
   | "properties" | "tenants" | "invoices" | "pl"
   | "jobs" | "schedule" | "completion"
-  | "accounts" | "vetting" | "disputes" | "settings" | "audit-log";
+  | "accounts" | "vetting" | "disputes" | "settings" | "audit-log"
+  | "features";
 
 const MOBILE_NAV_ROLES: PortalRole[] = ["tenant", "contractor"];
 
@@ -88,6 +90,8 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
         return <AuditLogPage />;
       case "settings":
         return <SettingsPage showToast={showToast} />;
+      case "features":
+        return <FeaturesPage />;
       default:
         return <DashboardHome role={role} user={user} onNavigate={(p) => setCurrentPage(p as Page)} onOpenChat={handleOpenChat} showToast={showToast} />;
     }

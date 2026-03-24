@@ -9,13 +9,29 @@ interface Props {
   onNavigate: (page: Page) => void;
 }
 
+// Mock drive times for demo
+const DRIVE_TIMES: Record<string, string> = {
+  "cj-1": "~12 min",
+  "cj-2": "~18 min",
+  "cj-3": "~7 min",
+  "cj-4": "~25 min",
+  "cj-5": "~15 min",
+};
+
 export default function ContractorDashboard({ user, onNavigate }: Props) {
   const contractor = CONTRACTORS.find((c) => c.id === user.entityId)!;
   const myJobs = CONTRACTOR_JOBS.filter((j) => j.status !== "completed" && j.status !== "cancelled");
-  const completedThisWeek = CONTRACTOR_JOBS.filter((j) => j.status === "completed").length;
+  const completedJobs = CONTRACTOR_JOBS.filter((j) => j.status === "completed");
+  const completedThisWeek = completedJobs.length;
   const pendingPay = INVOICES.filter((i) => i.contractorId === user.entityId && ["pending", "approved"].includes(i.status));
   const pendingPayTotal = pendingPay.reduce((s, i) => s + i.amount, 0);
   const openJobs = myJobs.filter((j) => j.status === "open").length;
+
+  // Earnings stats
+  const paidInvoices = INVOICES.filter((i) => i.contractorId === user.entityId && i.status === "paid");
+  const totalEarnedMonth = paidInvoices.reduce((s, i) => s + i.amount, 0) + 840; // mock YTD boost
+  const avgPerJob = completedThisWeek > 0 ? Math.round((totalEarnedMonth) / Math.max(completedThisWeek, 1)) : 0;
+  const isPreferred = contractor.rating >= 4.8;
 
   const urgencyBadge: Record<string, string> = {
     emergency: "badge-red",
@@ -35,11 +51,18 @@ export default function ContractorDashboard({ user, onNavigate }: Props) {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Greeting */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold text-white">Welcome back, {contractor.name.split(" ")[0]}</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl font-bold text-white">Welcome back, {contractor.name.split(" ")[0]}</h1>
+            {isPreferred && (
+              <span className="flex items-center gap-1 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full px-2 py-0.5">
+                ⭐ Preferred Contractor
+              </span>
+            )}
+          </div>
           <p className="text-sm text-gray-400 mt-0.5">
-            {contractor.specialty.join(", ")} · ⭐ {contractor.rating} · {contractor.completedJobs} jobs completed
+            {contractor.specialty.join(", ")} · ⭐ {contractor.rating} rating · {contractor.completedJobs} lifetime jobs
           </p>
         </div>
         <div className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
@@ -51,6 +74,51 @@ export default function ContractorDashboard({ user, onNavigate }: Props) {
         </div>
       </div>
 
+      {/* Earnings dashboard */}
+      <div className="card bg-gradient-to-br from-amber-950/20 to-navy-800 border-amber-700/30">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-white">Earnings This Month</h2>
+          <span className="text-xs text-amber-400 bg-amber-900/30 border border-amber-700/40 rounded-full px-2.5 py-1">March 2026</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Total Earned</p>
+            <p className="text-2xl font-bold text-amber-300">${totalEarnedMonth.toLocaleString()}</p>
+            <p className="text-[11px] text-green-400 mt-0.5">↑ 18% vs last month</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Avg. Per Job</p>
+            <p className="text-2xl font-bold text-white">${avgPerJob}</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">this month</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Jobs Completed</p>
+            <p className="text-2xl font-bold text-white">{completedThisWeek}</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">this month</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">Your Rating</p>
+            <div className="flex items-baseline gap-1">
+              <p className="text-2xl font-bold text-white">{contractor.rating}</p>
+              <span className="text-yellow-400 text-sm">★</span>
+            </div>
+            <div className="flex gap-0.5 mt-1">
+              {[1,2,3,4,5].map(s => (
+                <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= Math.round(contractor.rating) ? "bg-amber-400" : "bg-navy-700"}`} />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-navy-700/50 flex items-center justify-between">
+          <p className="text-xs text-gray-500">
+            Pending payout: <span className="text-teal-300 font-semibold">${pendingPayTotal.toLocaleString()}</span> across {pendingPay.length} invoice{pendingPay.length !== 1 ? "s" : ""}
+          </p>
+          <button onClick={() => onNavigate("payments")} className="text-xs text-teal-400 hover:text-teal-300 transition-colors">
+            View payouts →
+          </button>
+        </div>
+      </div>
+
       {/* KPI Row */}
       <div className="grid grid-cols-3 gap-4">
         <div className="kpi-card cursor-pointer hover:border-navy-600 transition-colors" onClick={() => onNavigate("jobs")}>
@@ -59,7 +127,7 @@ export default function ContractorDashboard({ user, onNavigate }: Props) {
           <div className="text-xs text-gray-500">available</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">This Week</div>
+          <div className="kpi-label">This Month</div>
           <div className="kpi-value">{completedThisWeek}</div>
           <div className="text-xs text-gray-500">jobs done</div>
         </div>
@@ -91,11 +159,25 @@ export default function ContractorDashboard({ user, onNavigate }: Props) {
                   <p className="text-sm text-white font-medium">{job.title}</p>
                   <span className={statusBadge[job.status]}>{job.status.replace("_", " ")}</span>
                   <span className={urgencyBadge[job.urgency]}>{job.urgency}</span>
+                  {job.urgency === "low" && (
+                    <span className="text-[10px] font-medium bg-blue-900/40 text-blue-300 border border-blue-700/40 rounded-full px-1.5 py-0.5">🔄 Recurring</span>
+                  )}
                 </div>
                 <p className="text-xs text-gray-400 mt-0.5">{job.propertyName} · Unit {job.unitNumber}</p>
-                {job.scheduledDate && (
-                  <p className="text-xs text-teal-400 mt-0.5">Scheduled: {job.scheduledDate}</p>
-                )}
+                <div className="flex items-center gap-3 mt-0.5">
+                  {DRIVE_TIMES[job.id] && (
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {DRIVE_TIMES[job.id]} away
+                    </p>
+                  )}
+                  {job.scheduledDate && (
+                    <p className="text-xs text-teal-400">Scheduled: {job.scheduledDate}</p>
+                  )}
+                </div>
                 {job.accessCode && (
                   <p className="text-xs text-amber-400 mt-0.5">Access code: {job.accessCode}</p>
                 )}

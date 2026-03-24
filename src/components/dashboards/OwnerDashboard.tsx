@@ -94,6 +94,58 @@ export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Pr
         </div>
       </div>
 
+      {/* Extended KPI row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="kpi-card">
+          <div className="kpi-label">Rent Collection</div>
+          <div className="kpi-value text-green-400">98.2%</div>
+          <div className="text-xs text-gray-500">last 6 months</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Tenant Satisfaction</div>
+          <div className="flex items-baseline gap-1">
+            <div className="kpi-value">4.6</div>
+            <span className="text-yellow-400 text-sm">★</span>
+          </div>
+          <div className="text-xs text-gray-500">maintenance surveys</div>
+        </div>
+        <div className="kpi-card cursor-pointer hover:border-navy-600 transition-colors" onClick={() => onNavigate("pl")}>
+          <div className="kpi-label">2025 Tax Docs</div>
+          <div className="kpi-value text-green-400 text-base font-semibold">Ready</div>
+          <div className="text-xs text-teal-400">1099 data available</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Insurance</div>
+          <div className="kpi-value text-amber-400 text-base font-semibold">1 soon</div>
+          <div className="text-xs text-amber-400/80">policy expiring</div>
+        </div>
+      </div>
+
+      {/* Vacancy Forecast */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gradient-to-r from-blue-950/40 to-navy-800 border border-blue-700/40 rounded-xl">
+        <div className="w-9 h-9 rounded-lg bg-blue-900/50 border border-blue-700/40 flex items-center justify-center shrink-0">
+          <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-white">Vacancy Forecast Alert</p>
+            <span className="badge-amber">3 months away</span>
+          </div>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Unit 102 lease expires <span className="text-blue-300 font-medium">Jun 30, 2026</span>.
+            Suggested: List now at <span className="text-green-300 font-medium">$3,800/mo</span> (+$200 market adjustment) to avoid vacancy.
+          </p>
+        </div>
+        <button
+          onClick={() => onNavigate("tenants")}
+          className="btn-secondary text-xs px-3 py-2 rounded-lg whitespace-nowrap min-h-[36px]"
+        >
+          Manage Tenants →
+        </button>
+      </div>
+
       {/* Charts row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Revenue trend */}

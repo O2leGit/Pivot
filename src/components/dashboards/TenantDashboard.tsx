@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { DemoUser } from "@/types";
 import type { Page } from "../Dashboard";
 import { TENANTS, PAYMENTS, MAINTENANCE_REQUESTS, MESSAGE_THREADS } from "@/data/demoData";
@@ -12,11 +13,17 @@ interface Props {
 }
 
 export default function TenantDashboard({ user, onNavigate, showToast }: Props) {
+  const [amenityModal, setAmenityModal] = useState<string | null>(null);
   const tenant = TENANTS.find((t) => t.id === user.entityId)!;
   const upcoming = PAYMENTS.find((p) => p.tenantId === tenant.id && p.status === "pending");
   const myRequests = MAINTENANCE_REQUESTS.filter((r) => r.tenantId === tenant.id).slice(0, 4);
   const threads = MESSAGE_THREADS.filter((t) => t.participantIds.includes(tenant.id));
   const unreadCount = threads.reduce((s, t) => s + t.unreadCount, 0);
+
+  // Lease renewal: Aug 31 2026 — ~160 days away (not within 60), show anyway for demo
+  const leaseEndDate = new Date("2026-08-31");
+  const daysUntilLeaseEnd = Math.ceil((leaseEndDate.getTime() - Date.now()) / 86400000);
+  const showRenewal = daysUntilLeaseEnd <= 90;
 
   const daysUntilDue = upcoming
     ? Math.ceil((new Date(upcoming.dueDate).getTime() - Date.now()) / 86400000)
@@ -148,6 +155,118 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
           <div className="text-xs text-gray-500">Unit 101</div>
         </div>
       </div>
+
+      {/* Community Announcements */}
+      <div className="p-4 bg-blue-950/30 border border-blue-700/40 rounded-xl">
+        <div className="flex items-center gap-2 mb-2">
+          <svg className="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+          </svg>
+          <span className="text-xs font-semibold text-blue-300 uppercase tracking-wider">Building Announcements</span>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-start gap-2.5">
+            <span className="text-xs font-medium text-amber-400 shrink-0 mt-0.5">Mar 28</span>
+            <p className="text-sm text-gray-300">Water shutoff for pipe maintenance — 9:00 AM to 11:00 AM. Please plan accordingly.</p>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <span className="text-xs font-medium text-gray-500 shrink-0 mt-0.5">Mar 20</span>
+            <p className="text-sm text-gray-400">Rooftop deck will be reopened after safety inspection — cleared!</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Package + Amenities row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Package tracking */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+              <span>📦</span> Package Tracking
+            </h2>
+            <span className="badge-teal">1 new</span>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 p-3 bg-green-950/30 border border-green-700/30 rounded-lg">
+              <svg className="w-4 h-4 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-gray-200 font-medium">Package delivered to lobby</p>
+                <p className="text-xs text-gray-500">Mar 23, 2:15 PM · Amazon · 1 item</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-navy-900/50 border border-navy-700/50 rounded-lg">
+              <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-gray-400">UPS package in transit</p>
+                <p className="text-xs text-gray-500">Expected Mar 25 · 1Z999AA01234567890</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Amenity booking */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+              <span>🏢</span> Book Amenities
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {[
+              { name: "Rooftop Deck", icon: "🌆", available: true, next: "Available now" },
+              { name: "Laundry Room", icon: "🧺", available: true, next: "Available — 2 of 4 machines open" },
+              { name: "Bike Storage", icon: "🚲", available: false, next: "Full — join waitlist" },
+            ].map((amenity) => (
+              <div key={amenity.name} className="flex items-center gap-3 p-2.5 bg-navy-900/50 border border-navy-700/50 rounded-lg">
+                <span className="text-lg">{amenity.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-200 font-medium">{amenity.name}</p>
+                  <p className={`text-xs ${amenity.available ? "text-teal-400" : "text-gray-500"}`}>{amenity.next}</p>
+                </div>
+                <button
+                  onClick={() => { setAmenityModal(amenity.name); showToast(`${amenity.name} booking confirmed!`); }}
+                  disabled={!amenity.available}
+                  className={`text-xs px-3 py-1.5 rounded-lg min-h-[32px] transition-colors ${
+                    amenity.available
+                      ? "bg-teal-900/40 text-teal-300 border border-teal-700/40 hover:bg-teal-900/70"
+                      : "bg-navy-800 text-gray-600 border border-navy-700 cursor-not-allowed"
+                  }`}
+                >
+                  {amenity.available ? "Book" : "Full"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Lease renewal banner */}
+      {(showRenewal || true) && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-gradient-to-r from-blue-950/60 to-navy-800 border border-blue-700/50 rounded-xl">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-sm font-semibold text-white">Lease Renewal Available</span>
+            </div>
+            <p className="text-xs text-gray-400">
+              Your lease ends <span className="text-blue-300 font-medium">Aug 31, 2026</span> — {daysUntilLeaseEnd} days away.
+              Lock in your current rate before prices adjust.
+            </p>
+          </div>
+          <button
+            onClick={() => { onNavigate("lease"); showToast("Opening lease renewal…"); }}
+            className="btn-primary text-sm px-4 py-2.5 rounded-lg min-h-[40px] whitespace-nowrap"
+          >
+            Renew Now →
+          </button>
+        </div>
+      )}
 
       {/* Bottom grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
