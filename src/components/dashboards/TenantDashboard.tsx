@@ -14,6 +14,7 @@ interface Props {
 
 export default function TenantDashboard({ user, onNavigate, showToast }: Props) {
   const [amenityModal, setAmenityModal] = useState<string | null>(null);
+  const [paySuccess, setPaySuccess] = useState(false);
   const tenant = TENANTS.find((t) => t.id === user.entityId)!;
   const upcoming = PAYMENTS.find((p) => p.tenantId === tenant.id && p.status === "pending");
   const myRequests = MAINTENANCE_REQUESTS.filter((r) => r.tenantId === tenant.id).slice(0, 4);
@@ -102,10 +103,20 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
             )}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
               <button
-                onClick={() => { onNavigate("payments"); showToast("Redirecting to payments…"); }}
-                className="btn-primary px-5 py-3 text-sm rounded-lg min-h-[44px] sm:py-2"
+                onClick={() => {
+                  setPaySuccess(true);
+                  showToast("Payment submitted! Processing now…");
+                  setTimeout(() => setPaySuccess(false), 2000);
+                  setTimeout(() => onNavigate("payments"), 700);
+                }}
+                className={`btn-primary px-5 py-3 text-sm rounded-lg min-h-[44px] sm:py-2 flex items-center gap-2 ${paySuccess ? "animate-success-pop" : ""}`}
               >
-                Pay Now
+                {paySuccess ? (
+                  <>
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    Submitted!
+                  </>
+                ) : "Pay Now"}
               </button>
               <button
                 onClick={() => onNavigate("payments")}

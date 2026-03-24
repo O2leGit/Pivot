@@ -183,8 +183,14 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
                     <div className="text-xs text-gray-400 mt-0.5">{contractor.name}</div>
                   )}
                   {req.aiUrgencyScore !== undefined && (
-                    <div className={`text-xs mt-1 ${req.aiUrgencyScore >= 70 ? "text-red-400" : req.aiUrgencyScore >= 45 ? "text-amber-400" : "text-green-400"}`}>
-                      AI: {req.aiUrgencyScore}/100
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="flex items-center gap-0.5 text-[10px] text-teal-500 font-medium">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        AI
+                      </span>
+                      <span className={`text-xs font-semibold ${req.aiUrgencyScore >= 70 ? "text-red-400" : req.aiUrgencyScore >= 45 ? "text-amber-400" : "text-green-400"}`}>
+                        {req.aiUrgencyScore}/100
+                      </span>
                     </div>
                   )}
                 </div>

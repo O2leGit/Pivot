@@ -125,33 +125,41 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
       {/* Back to portals — always visible */}
       <button
         onClick={onLogout}
-        title="Back to portal select"
-        className="flex items-center gap-2.5 px-3 py-2.5 text-xs text-gray-400 hover:text-white hover:bg-navy-800 transition-colors border-b border-navy-800 w-full"
+        title="Switch portal"
+        aria-label="Switch portal"
+        className="sidebar-nav-item relative flex items-center gap-2.5 px-3 py-2.5 text-xs text-gray-400 hover:text-white hover:bg-navy-800 transition-colors border-b border-navy-800 w-full"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         {expanded && <span className="font-medium">Switch Portal</span>}
+        {!expanded && <span className="sidebar-tooltip">Switch Portal</span>}
       </button>
 
       {/* Nav items */}
       <nav className="flex-1 py-2 overflow-y-auto">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => { onNavigate(item.id); if (isMobile) setExpanded(false); }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors border-r-2 ${
-              currentPage === item.id
-                ? "bg-navy-800 text-white border-r-[3px]"
-                : "text-gray-400 hover:text-gray-200 hover:bg-navy-800/50 border-transparent"
-            }`}
-            style={currentPage === item.id ? { color: brandColor, borderColor: brandColor } : undefined}
-            title={!expanded ? item.label : undefined}
-          >
-            <span className="flex-shrink-0">{item.icon}</span>
-            {expanded && <span className="truncate">{item.label}</span>}
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const isActive = currentPage === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => { onNavigate(item.id); if (isMobile) setExpanded(false); }}
+              aria-label={item.label}
+              aria-current={isActive ? "page" : undefined}
+              className={`sidebar-nav-item relative w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-150 border-r-[3px] ${
+                isActive
+                  ? "bg-navy-700/70 text-white font-medium"
+                  : "text-gray-400 hover:text-gray-100 hover:bg-navy-800/60 border-transparent"
+              }`}
+              style={isActive ? { color: brandColor, borderColor: brandColor } : undefined}
+            >
+              <span className="flex-shrink-0 transition-transform duration-150" style={isActive ? { color: brandColor } : undefined}>{item.icon}</span>
+              {expanded && <span className="truncate">{item.label}</span>}
+              {/* Tooltip when collapsed */}
+              {!expanded && <span className="sidebar-tooltip">{item.label}</span>}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Footer */}

@@ -159,3 +159,118 @@
 .animate-ai-pulse {
   animation: aiPulse 2.5s ease-in-out infinite;
 }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1B2A4A 25%, #27426c 50%, #1B2A4A 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+.skeleton-text { @apply skeleton h-4 w-full rounded; }
+.skeleton-title { @apply skeleton h-6 w-48 rounded; }
+.skeleton-card { @apply skeleton h-32 w-full rounded-xl; }
+
+/* Page skeleton wrapper */
+.page-skeleton {
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* Focus ring — visible for keyboard nav */
+:focus-visible {
+  outline: 2px solid #0D9488;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Sidebar tooltip */
+.sidebar-tooltip {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1B2A4A;
+  border: 1px solid #27426c;
+  color: #e5e7eb;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.sidebar-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: #27426c;
+}
+.sidebar-nav-item:hover .sidebar-tooltip {
+  opacity: 1;
+}
+
+/* Inline tooltip */
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.tooltip-tip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1B2A4A;
+  border: 1px solid #27426c;
+  color: #e5e7eb;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: 240px;
+  white-space: normal;
+  padding: 6px 10px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  transition: opacity 0.15s;
+}
+.tooltip-wrap:hover .tooltip-tip {
+  opacity: 1;
+}
+
+/* No scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Success flash */
+@keyframes successPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-success-pop {
+  animation: successPop 0.35s ease-out forwards;
+}
+
+/* Tour pulse ring */
+@keyframes tourPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(13,148,136,0.6); }
+  50% { box-shadow: 0 0 0 10px rgba(13,148,136,0); }
+}
+.tour-highlight {
+  animation: tourPulse 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}

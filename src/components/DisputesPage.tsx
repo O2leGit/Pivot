@@ -53,6 +53,14 @@ export default function DisputesPage({ showToast }: Props) {
         ))}
       </div>
 
+      {filtered.length === 0 && (
+        <div className="card text-center py-14">
+          <div className="text-4xl mb-3">🛡️</div>
+          <p className="text-sm font-semibold text-white mb-1">No disputes in this category</p>
+          <p className="text-xs text-gray-500">Your portfolio is running smoothly — no open disputes to resolve.</p>
+        </div>
+      )}
+
       <div className="space-y-3">
         {filtered.map((d) => (
           <div

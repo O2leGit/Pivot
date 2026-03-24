@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { PortalRole, DemoUser } from "@/types";
 import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
@@ -26,7 +26,43 @@ interface DashboardProps {
   user: DemoUser;
   onLogout: () => void;
   onLoginAs?: (role: PortalRole) => void;
+  tourActive?: boolean;
+  onTourEnd?: () => void;
 }
+
+// Guided tour steps for Owner portal
+const TOUR_STEPS = [
+  {
+    title: "Portfolio Overview",
+    icon: "📊",
+    desc: "Your dashboard shows real-time KPIs: monthly revenue, occupancy rate, maintenance alerts, and overdue rent — all in one glance.",
+    hint: "Tip: Click any KPI card to drill into details.",
+  },
+  {
+    title: "AI Maintenance Triage",
+    icon: "🔧",
+    desc: "Tenants submit requests with photos. Pivot AI classifies urgency, estimates repair cost, and routes to the right contractor — before you see it.",
+    hint: "Navigate to Maintenance to see active requests.",
+  },
+  {
+    title: "Properties & Mode Switching",
+    icon: "🔄",
+    desc: "Toggle any property between STR and LTR mode with a single click. Set seasonal schedules to automate transitions.",
+    hint: "Click any property card to see units, IoT devices, and mode controls.",
+  },
+  {
+    title: "P&L Dashboard",
+    icon: "💰",
+    desc: "Per-property profit & loss with 6-month trends and one-click CSV export for your accountant.",
+    hint: "Navigate to P&L to see revenue vs. expenses by property.",
+  },
+  {
+    title: "Ask Pivot AI",
+    icon: "🤖",
+    desc: "Your AI assistant knows your entire portfolio. Ask anything: 'What's my occupancy?', 'Which units are overdue?', 'Estimate repair cost for Unit 102'.",
+    hint: "Click the Ask Pivot AI button (bottom-right) anytime.",
+  },
+];
 
 export type Page =
   | "dashboard" | "maintenance" | "payments" | "messages"
@@ -38,11 +74,49 @@ export type Page =
 
 const MOBILE_NAV_ROLES: PortalRole[] = ["tenant", "contractor"];
 
-export default function Dashboard({ role, user, onLogout, onLoginAs }: DashboardProps) {
+function PageSkeleton() {
+  return (
+    <div className="space-y-6 page-skeleton">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <div className="skeleton h-6 w-48 rounded" />
+          <div className="skeleton h-4 w-72 rounded" />
+        </div>
+        <div className="skeleton h-9 w-24 rounded-lg" />
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[1,2,3,4].map(i => <div key={i} className="skeleton h-24 rounded-xl" />)}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="skeleton h-56 rounded-xl md:col-span-2" />
+        <div className="skeleton h-56 rounded-xl" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="skeleton h-40 rounded-xl" />
+        <div className="skeleton h-40 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+export default function Dashboard({ role, user, onLogout, onLoginAs, tourActive = false, onTourEnd }: DashboardProps) {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string | undefined>(undefined);
   const [toasts, setToasts] = useState<{ id: number; message: string; type: "success" | "error" }[]>([]);
+  const [tourStep, setTourStep] = useState(0);
+  const [showTour, setShowTour] = useState(tourActive);
+  const [pageLoading, setPageLoading] = useState(false);
+
+  useEffect(() => { setShowTour(tourActive); setTourStep(0); }, [tourActive]);
+
+  const navigateTo = (page: string) => {
+    setPageLoading(true);
+    setTimeout(() => {
+      setCurrentPage(page as Page);
+      setPageLoading(false);
+    }, 180);
+  };
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
     const id = Date.now();
@@ -60,9 +134,9 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
   const renderPage = () => {
     switch (currentPage) {
       case "dashboard":
-        return <DashboardHome role={role} user={user} onNavigate={(p) => setCurrentPage(p as Page)} onOpenChat={handleOpenChat} showToast={showToast} onLoginAs={onLoginAs} />;
+        return <DashboardHome role={role} user={user} onNavigate={navigateTo} onOpenChat={handleOpenChat} showToast={showToast} onLoginAs={onLoginAs} />;
       case "properties":
-        return <PropertiesPage role={role} onNavigate={(p) => setCurrentPage(p as Page)} showToast={showToast} />;
+        return <PropertiesPage role={role} onNavigate={navigateTo} showToast={showToast} />;
       case "maintenance":
         return <MaintenancePage role={role} user={user} onOpenChat={handleOpenChat} showToast={showToast} />;
       case "payments":
@@ -76,7 +150,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
       case "jobs":
       case "schedule":
       case "completion":
-        return <ContractorJobsPage user={user} currentTab={currentPage as "jobs" | "schedule" | "completion"} onNavigate={(p) => setCurrentPage(p as Page)} showToast={showToast} />;
+        return <ContractorJobsPage user={user} currentTab={currentPage as "jobs" | "schedule" | "completion"} onNavigate={navigateTo} showToast={showToast} />;
       case "lease":
         return <LeasePage user={user} showToast={showToast} />;
       case "messages":
@@ -93,7 +167,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
       case "features":
         return <FeaturesPage />;
       default:
-        return <DashboardHome role={role} user={user} onNavigate={(p) => setCurrentPage(p as Page)} onOpenChat={handleOpenChat} showToast={showToast} />;
+        return <DashboardHome role={role} user={user} onNavigate={navigateTo} onOpenChat={handleOpenChat} showToast={showToast} />;
     }
   };
 
@@ -105,7 +179,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
           role={role}
           user={user}
           currentPage={currentPage}
-          onNavigate={(p) => setCurrentPage(p as Page)}
+          onNavigate={navigateTo}
           onLogout={onLogout}
         />
       </div>
@@ -113,7 +187,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
       {/* Main content */}
       <main className={`flex-1 overflow-y-auto transition-all duration-200 ${chatOpen ? "md:mr-[380px]" : ""}`}>
         <div className={`p-4 md:p-6 max-w-7xl mx-auto ${hasMobileNav ? "pb-24 md:pb-6" : ""}`}>
-          {renderPage()}
+          {pageLoading ? <PageSkeleton /> : renderPage()}
         </div>
       </main>
 
@@ -122,7 +196,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
         <MobileNav
           role={role}
           currentPage={currentPage}
-          onNavigate={(p) => setCurrentPage(p as Page)}
+          onNavigate={navigateTo}
           onOpenChat={() => setChatOpen(true)}
         />
       )}
@@ -151,8 +225,69 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
           initialMessage={chatInitialMessage}
           onInitialMessageSent={() => setChatInitialMessage(undefined)}
           onClose={() => setChatOpen(false)}
-          onNavigate={(p) => setCurrentPage(p as Page)}
+          onNavigate={navigateTo}
         />
+      )}
+
+      {/* Guided Tour Overlay */}
+      {showTour && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="bg-navy-800 border border-navy-600 rounded-2xl shadow-2xl w-full max-w-md animate-fade-in">
+            {/* Progress dots */}
+            <div className="flex items-center justify-center gap-1.5 pt-5 pb-1">
+              {TOUR_STEPS.map((_, i) => (
+                <div key={i} className={`h-1.5 rounded-full transition-all ${i === tourStep ? "w-6 bg-teal-500" : i < tourStep ? "w-2 bg-teal-700" : "w-2 bg-navy-600"}`} />
+              ))}
+            </div>
+            <div className="p-6">
+              <div className="text-4xl mb-3">{TOUR_STEPS[tourStep].icon}</div>
+              <div className="text-xs font-semibold text-teal-400 uppercase tracking-wider mb-1">
+                Step {tourStep + 1} of {TOUR_STEPS.length}
+              </div>
+              <h2 className="text-lg font-bold text-white mb-2">{TOUR_STEPS[tourStep].title}</h2>
+              <p className="text-sm text-gray-300 leading-relaxed mb-3">{TOUR_STEPS[tourStep].desc}</p>
+              <div className="flex items-center gap-1.5 p-2.5 bg-navy-900/60 border border-navy-700 rounded-lg">
+                <svg className="w-3.5 h-3.5 text-teal-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-gray-400">{TOUR_STEPS[tourStep].hint}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-6 pb-5 gap-3">
+              <button
+                onClick={() => { setShowTour(false); onTourEnd?.(); }}
+                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Skip tour
+              </button>
+              <div className="flex items-center gap-2">
+                {tourStep > 0 && (
+                  <button
+                    onClick={() => setTourStep(s => s - 1)}
+                    className="btn-secondary text-sm px-4 py-2"
+                  >
+                    ← Back
+                  </button>
+                )}
+                {tourStep < TOUR_STEPS.length - 1 ? (
+                  <button
+                    onClick={() => setTourStep(s => s + 1)}
+                    className="btn-primary text-sm px-5 py-2"
+                  >
+                    Next →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setShowTour(false); onTourEnd?.(); }}
+                    className="btn-primary text-sm px-5 py-2"
+                  >
+                    Start Exploring ✓
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Toast notifications */}

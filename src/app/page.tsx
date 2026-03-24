@@ -19,16 +19,20 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
   const [impersonating, setImpersonating] = useState<{ fromType: ViewType; fromUser: DemoUser } | null>(null);
   const [quickLogging, setQuickLogging] = useState<PortalRole | null>(null);
+  const [tourActive, setTourActive] = useState(false);
 
-  const handleQuickLogin = (role: PortalRole) => {
+  const handleQuickLogin = (role: PortalRole, withTour = false) => {
     setQuickLogging(role);
     setTimeout(() => {
       const user = DEMO_USERS.find((u) => u.role === role)!;
       setCurrentUser(user);
       setViewType(ROLE_TO_VIEW[role]);
       setQuickLogging(null);
+      if (withTour) setTourActive(true);
     }, 600);
   };
+
+  const handleTakeTour = () => handleQuickLogin("owner", true);
 
   const handleLogout = () => { setViewType(null); setCurrentUser(null); setImpersonating(null); };
 
@@ -70,7 +74,7 @@ export default function Home() {
           </div>
         )}
         <div className="flex-1 overflow-hidden">
-          <Dashboard role={currentUser.role} user={currentUser} onLogout={handleLogout} onLoginAs={handleLoginAs} />
+          <Dashboard role={currentUser.role} user={currentUser} onLogout={handleLogout} onLoginAs={handleLoginAs} tourActive={tourActive} onTourEnd={() => setTourActive(false)} />
         </div>
       </div>
     );
@@ -157,7 +161,7 @@ export default function Home() {
         {/* Brand card */}
         <div className="card">
           {/* Logo */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-5">
             <div className="flex items-center justify-center mb-3">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0891B2 100%)" }}>
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -166,18 +170,40 @@ export default function Home() {
               </div>
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Pivot</h1>
-            <p className="text-sm text-gray-400 mt-1">Property Management Platform</p>
+            <p className="text-sm text-gray-400 mt-0.5">Property Management Platform</p>
+            <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">AI-powered tools for independent landlords managing 1–50 units</p>
           </div>
+
+          {/* Take a Tour CTA */}
+          <button
+            onClick={handleTakeTour}
+            disabled={!!quickLogging}
+            className="w-full mb-4 flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-teal-700/60 bg-teal-900/20 text-teal-300 text-sm font-medium hover:bg-teal-900/40 transition-all disabled:opacity-50"
+          >
+            {quickLogging === "owner" ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            Take a Guided Tour
+          </button>
 
           {/* Quick Login */}
           <div className="mb-4">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-2.5 text-center">Quick Login — Select a Portal</p>
+            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-2.5 text-center">Or select a portal to explore</p>
             <div className="grid grid-cols-2 gap-2.5">
               {portals.map((btn) => (
                 <button
                   key={btn.role}
                   onClick={() => handleQuickLogin(btn.role)}
                   disabled={!!quickLogging}
+                  aria-label={`Log in as ${btn.label}`}
                   className={`flex items-center gap-3 p-3.5 rounded-xl border border-navy-700 bg-navy-900 ${btn.hover} hover:bg-navy-800 transition-all group disabled:opacity-50 text-left`}
                 >
                   <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${btn.from} ${btn.to} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
@@ -218,8 +244,32 @@ export default function Home() {
           ))}
         </div>
 
-        <p className="text-center text-[10px] text-gray-700">
-          Demo environment · No real data · No backend required
+        {/* Social proof + trust signals */}
+        <div className="card py-4 px-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex -space-x-2">
+                {["teal", "blue", "amber", "purple"].map((c, i) => (
+                  <div key={i} className={`w-7 h-7 rounded-full bg-${c}-600 border-2 border-navy-800 flex items-center justify-center text-white text-[10px] font-bold`}>
+                    {["M","S","J","A"][i]}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-white">200+ independent landlords</p>
+                <p className="text-[10px] text-gray-500">managing 1–3,000 units on Pivot</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-gray-400">
+              <span className="flex items-center gap-1"><span className="text-yellow-400">★★★★★</span> 4.9/5</span>
+              <span className="text-navy-600">·</span>
+              <span>Starting at $19/mo</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-[10px] text-gray-600">
+          Interactive product demo
         </p>
       </div>
     </div>

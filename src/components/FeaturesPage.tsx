@@ -396,9 +396,17 @@ export default function FeaturesPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold text-white">Features & Comparison Guide</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Everything you need to know about Pivot — and how it stacks up.</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold text-white">Features & Comparison Guide</h1>
+          <p className="text-sm text-gray-400 mt-0.5">Everything you need to know about Pivot — and how it stacks up.</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold bg-teal-900/40 text-teal-300 border border-teal-700/50 rounded-full px-3 py-1.5">
+            Starting at $19/mo
+          </span>
+          <span className="text-xs text-gray-500 bg-navy-800 border border-navy-700 rounded-full px-3 py-1.5">14-day free trial</span>
+        </div>
       </div>
 
       {/* ROI Summary Banner */}
@@ -738,6 +746,30 @@ export default function FeaturesPage() {
           </div>
         </div>
       )}
+      {/* Bottom CTA — always visible regardless of section */}
+      <div className="mt-4 rounded-2xl bg-gradient-to-br from-teal-950/50 via-navy-800 to-navy-800 border border-teal-700/40 p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+        <div>
+          <h3 className="text-base font-bold text-white mb-1">Ready to see Pivot in action?</h3>
+          <p className="text-sm text-gray-400">Start your 14-day free trial. No credit card required. Cancel anytime.</p>
+          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+            <span className="flex items-center gap-1"><span className="text-green-400">✓</span> Free setup</span>
+            <span className="flex items-center gap-1"><span className="text-green-400">✓</span> Onboarding call included</span>
+            <span className="flex items-center gap-1"><span className="text-green-400">✓</span> Import existing data</span>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
+          <button
+            className="py-2.5 px-5 rounded-xl text-sm font-semibold bg-teal-600 hover:bg-teal-500 text-white transition-colors min-h-[44px]"
+          >
+            Get Started Free
+          </button>
+          <button
+            className="py-2.5 px-5 rounded-xl text-sm font-semibold border border-navy-600 text-gray-300 hover:border-navy-500 hover:text-white transition-colors min-h-[44px]"
+          >
+            Book a Demo
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
