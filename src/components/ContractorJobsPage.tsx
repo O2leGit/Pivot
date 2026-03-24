@@ -105,42 +105,44 @@ export default function ContractorJobsPage({ currentTab, onNavigate, showToast }
                     const t = JOB_TIMES[j.id];
                     return t && t.date === day && t.startHour === hour;
                   });
-                  // Check if this cell is a continuation of a job started earlier
-                  const isContinuation = !job && CONTRACTOR_JOBS.some(j => {
+                  // Find a job continuing through this cell
+                  const continuationJob = !job ? CONTRACTOR_JOBS.find(j => {
                     const t = JOB_TIMES[j.id];
                     return t && t.date === day && t.startHour < hour && hour < t.startHour + t.durationHours;
-                  });
-                  const colorClass = job ? (JOB_COLORS[job.category] || JOB_COLORS.other) : "";
+                  }) : undefined;
+                  const isContinuation = !!continuationJob;
+                  const colorClass = job
+                    ? (JOB_COLORS[job.category] || JOB_COLORS.other)
+                    : continuationJob
+                    ? (JOB_COLORS[continuationJob.category] || JOB_COLORS.other)
+                    : "";
+                  const activeJob = job || continuationJob;
 
                   return (
                     <div
                       key={day}
                       className={`h-10 border-t border-navy-800/60 ${
                         job
-                          ? `${colorClass} border rounded-t-md px-1.5 pt-1 cursor-pointer hover:opacity-90`
+                          ? `${colorClass} border rounded-t-md px-1.5 pt-0.5 cursor-pointer hover:opacity-90`
                           : isContinuation
-                          ? "bg-blue-900/30 border-l border-r border-blue-700/40 cursor-pointer"
+                          ? `${colorClass} opacity-60 border-l border-r px-1.5 cursor-pointer hover:opacity-80`
                           : "hover:bg-navy-800/30"
                       }`}
-                      onClick={() => {
-                        if (job) { setSelectedJob(job); return; }
-                        if (isContinuation) {
-                          const j = CONTRACTOR_JOBS.find(jj => {
-                            const t = JOB_TIMES[jj.id];
-                            return t && t.date === day && t.startHour < hour && hour < t.startHour + t.durationHours;
-                          });
-                          if (j) setSelectedJob(j);
-                        }
-                      }}
+                      onClick={() => { if (activeJob) setSelectedJob(activeJob); }}
                     >
-                      {job && (
-                        <div>
-                          <p className="text-[9px] font-semibold leading-tight truncate">{job.title}</p>
-                          {job.accessCode && (
-                            <p className="text-[8px] text-amber-400 font-mono leading-none mt-0.5">{job.accessCode}</p>
-                          )}
-                        </div>
-                      )}
+                      {job && (() => {
+                        const t = JOB_TIMES[job.id];
+                        const endHour = t ? t.startHour + t.durationHours : null;
+                        return (
+                          <div>
+                            <p className="text-[9px] font-semibold leading-tight truncate">{job.propertyName.replace("The ", "")}</p>
+                            <p className="text-[8px] leading-tight truncate opacity-80">{HOUR_LABEL(t?.startHour ?? hour)}–{endHour ? HOUR_LABEL(endHour) : ""}</p>
+                            {job.accessCode && (
+                              <p className="text-[8px] text-amber-300 font-mono leading-none">{job.accessCode}</p>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}
