@@ -48,7 +48,7 @@ export default function ContractorJobsPage({ currentTab, onNavigate, showToast }
         <div className="page-header">
           <div>
             <h1 className="page-title">My Schedule</h1>
-            <p className="page-subtitle">Week of March 24–30, 2025</p>
+            <p className="page-subtitle">Week of March 24–30, 2026</p>
           </div>
         </div>
 
@@ -59,7 +59,7 @@ export default function ContractorJobsPage({ currentTab, onNavigate, showToast }
           </div>
           <div className="grid grid-cols-7 gap-1">
             {[24, 25, 26, 27, 28, 29, 30].map((day) => {
-              const job = CALENDAR_JOBS.find(j => j.scheduledDate === `2025-03-${day}`);
+              const job = CALENDAR_JOBS.find(j => j.scheduledDate === `2026-03-${day}`);
               return (
                 <div
                   key={day}

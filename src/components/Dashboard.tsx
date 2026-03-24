@@ -113,7 +113,7 @@ export default function Dashboard({ role, user, onLogout, onLoginAs }: Dashboard
       {!chatOpen && (
         <button
           onClick={() => setChatOpen(true)}
-          className="fixed right-4 bottom-4 text-white rounded-full shadow-lg z-50 transition-all flex items-center gap-2 px-4 py-3 hover:scale-105"
+          className="fixed right-4 bottom-4 text-white rounded-full shadow-lg z-50 transition-all flex items-center gap-2 px-4 py-3 hover:scale-105 animate-ai-pulse"
           style={{ background: "linear-gradient(135deg, #0D9488 0%, #0891B2 100%)" }}
           title="Ask Pivot AI"
         >

@@ -49,14 +49,14 @@ const SUGGESTED_PROMPTS: Record<PortalRole, string[]> = {
 };
 
 const AI_RESPONSES: Record<string, string> = {
-  "when is my next rent payment due": "Your next rent payment of **$2,850** is due **April 1, 2025**. You have AutoPay enabled, so it will process automatically on March 29th via ACH. I'll send you a reminder 3 days before.",
+  "when is my next rent payment due": "Your next rent payment of **$2,850** is due **April 1, 2026**. You have AutoPay enabled, so it will process automatically on March 29th via ACH. I'll send you a reminder 3 days before.",
   "how do i submit a maintenance request": "To submit a maintenance request:\n1. Go to **Maintenance** in the left sidebar\n2. Click **Submit New Request**\n3. Describe the issue, choose urgency, and optionally upload photos\n4. Submit — our AI will triage it and your landlord will assign a contractor\n\nMost requests are acknowledged within 2 hours!",
-  "what does my lease say about pets": "Your current lease (Unit 101, expiring Aug 31, 2025) has a **no pets** policy. If you'd like to discuss a pet addendum, you can message Marcus Rivera directly through the Messages tab. Lease renewals sometimes allow for negotiated pet policies.",
+  "what does my lease say about pets": "Your current lease (Unit 101, expiring Aug 31, 2026) has a **no pets** policy. If you'd like to discuss a pet addendum, you can message Marcus Rivera directly through the Messages tab. Lease renewals sometimes allow for negotiated pet policies.",
   "how do i set up autopay": "Great news — AutoPay is **already enabled** on your account! Your rent is set to auto-debit $2,850 via ACH on the last business day before the 1st of each month. You can toggle this off in the **Payments** section if needed.",
   "what's my portfolio occupancy rate": "Your current portfolio occupancy is **82%** (9 of 11 units occupied):\n\n- **The Harlow Apartments:** 5/6 units — 83%\n- **Pacific Pines Cabin:** STR mode — currently booked\n- **Bayview Lofts:** 3/4 units — 75%\n\nUnit 302 (Harlow, 1BR) has been vacant for 18 days. Want me to draft a listing?",
   "which maintenance requests need my approval": "You have **1 request pending your approval:**\n\n🔧 **Dishwasher replacement** — Unit 102 (Derek Moss)\n- Estimated cost: **$320**\n- Contractor: Rob McAllister\n- AI triage: Drain pump failure, no structural risk\n\nGo to **Maintenance → Approvals** to approve or reject, or I can trigger the approval from here.",
   "how is pacific pines performing as an str": "**Pacific Pines Cabin — STR Performance (last 6 months):**\n\n- Avg monthly revenue: **$5,423**\n- This month (March): **$6,840** — your best month!\n- Average nightly rate: **$285**\n- Occupancy: ~78% across the period\n\nFor context, comparable Guerneville STRs average $240/night. You're pricing well. Consider a slight rate increase to $295–$310 for summer peak season.",
-  "what's our mrr this month": "**Platform MRR (March 2025): $1,375**\n\nMonth-over-month growth: **+12.4%** 📈\n\nBreakdown:\n- Marcus Rivera (Pro): $239/mo\n- James Okafor (Enterprise): $799/mo  \n- Diana Walsh (Starter): $49/mo\n- Sandra Liu (Pro, trial): $239/mo\n\nFeature upsell opportunity: Victor Reyes (suspended) had 2 units — worth a win-back call.",
+  "what's our mrr this month": "**Platform MRR (March 2026): $1,375**\n\nMonth-over-month growth: **+12.4%** 📈\n\nBreakdown:\n- Marcus Rivera (Pro): $239/mo\n- James Okafor (Enterprise): $799/mo  \n- Diana Walsh (Starter): $49/mo\n- Sandra Liu (Pro, trial): $239/mo\n\nFeature upsell opportunity: Victor Reyes (suspended) had 2 units — worth a win-back call.",
   "are there any open disputes": "There are **2 open disputes** requiring attention:\n\n1. **Maintenance delay claim** (Derek Moss, $150) — opened Mar 20. Derek claims 3-week dishwasher delay cost him laundromat fees. Still open.\n\n2. **Security deposit dispute** (former tenant Alex Kim, $4,400) — under review since Mar 10. 21-day return window legally required.\n\nI recommend prioritizing the deposit dispute — it has the highest legal exposure. Want me to pull the move-out checklist?",
   "which contractor applications are pending": "There is **1 contractor application** pending review:\n\n- **New applicant** — specialty: electrical, license verified\n- Submitted background check ✓\n- References provided: 2 of 3\n- Awaiting: final reference + insurance certificate\n\nGo to **Contractor Vetting** to review and approve.",
   default: "I'm Pivot AI, your property management assistant. I can help with rent payments, maintenance requests, lease questions, portfolio analytics, and more. What would you like to know?",
@@ -97,7 +97,10 @@ function renderMarkdown(text: string): string {
 }
 
 export default function ChatPanel({ role, currentPage, initialMessage, onInitialMessageSent, onClose }: ChatPanelProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const WELCOME = `I'm your AI property assistant. I can help with **maintenance triage**, **rent pricing**, **tenant screening**, and **portfolio analysis**. What would you like to know?`;
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: "welcome", role: "assistant", content: WELCOME, timestamp: new Date().toISOString() },
+  ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

@@ -28,7 +28,7 @@ export default function AdminDashboardHome({ onNavigate, onLoginAs }: Props) {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white">Business Dashboard</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Platform overview · March 2025</p>
+        <p className="text-sm text-gray-400 mt-0.5">Platform overview · March 2026</p>
       </div>
 
       {/* KPI Row */}
@@ -81,20 +81,14 @@ export default function AdminDashboardHome({ onNavigate, onLoginAs }: Props) {
           <h2 className="text-sm font-semibold text-white mb-4">MRR Growth (6 months)</h2>
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={ADMIN_MRR_TREND} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-              <defs>
-                <linearGradient id="mrrGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={CHART_COLORS.purple} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={CHART_COLORS.purple} stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#27426c" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+              <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${v}`} />
               <Tooltip
                 contentStyle={{ background: "#1B2A4A", border: "1px solid #27426c", borderRadius: "8px", fontSize: "12px" }}
                 formatter={(v: number) => [`$${v.toLocaleString()}`, "MRR"]}
               />
-              <Area type="monotone" dataKey="mrr" stroke={CHART_COLORS.purple} fill="url(#mrrGrad)" strokeWidth={2} />
+              <Area type="monotone" dataKey="mrr" stroke={CHART_COLORS.purple} fill={CHART_COLORS.purple} fillOpacity={0.15} strokeWidth={2} dot={false} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -111,7 +105,7 @@ export default function AdminDashboardHome({ onNavigate, onLoginAs }: Props) {
                 contentStyle={{ background: "#1B2A4A", border: "1px solid #27426c", borderRadius: "8px", fontSize: "12px" }}
                 formatter={(v: number) => [v, "Accounts"]}
               />
-              <Bar dataKey="count" fill={CHART_COLORS.teal} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill={CHART_COLORS.teal} radius={[4, 4, 0, 0]} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>

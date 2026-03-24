@@ -101,26 +101,16 @@ export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Pr
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={revenueTrend} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-              <defs>
-                <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={CHART_COLORS.teal} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={CHART_COLORS.teal} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="exp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={CHART_COLORS.red} stopOpacity={0.2} />
-                  <stop offset="95%" stopColor={CHART_COLORS.red} stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#27426c" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+              <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
               <Tooltip
                 contentStyle={{ background: "#1B2A4A", border: "1px solid #27426c", borderRadius: "8px", fontSize: "12px" }}
                 labelStyle={{ color: "#e5e7eb" }}
                 formatter={(v: number) => [`$${v.toLocaleString()}`, ""]}
               />
-              <Area type="monotone" dataKey="revenue" stroke={CHART_COLORS.teal} fill="url(#rev)" strokeWidth={2} name="Revenue" />
-              <Area type="monotone" dataKey="expenses" stroke={CHART_COLORS.red} fill="url(#exp)" strokeWidth={2} name="Expenses" />
+              <Area type="monotone" dataKey="revenue" stroke={CHART_COLORS.teal} fill={CHART_COLORS.teal} fillOpacity={0.15} strokeWidth={2} dot={false} isAnimationActive={false} name="Revenue" />
+              <Area type="monotone" dataKey="expenses" stroke={CHART_COLORS.red} fill={CHART_COLORS.red} fillOpacity={0.1} strokeWidth={2} dot={false} isAnimationActive={false} name="Expenses" />
             </AreaChart>
           </ResponsiveContainer>
           <div className="flex gap-4 mt-2 justify-end">

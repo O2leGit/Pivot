@@ -14,6 +14,7 @@ interface Props {
 export default function PropertiesPage({ showToast }: Props) {
   const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
   const [modeToggles, setModeToggles] = useState<Record<string, string>>({});
+  const [modeConfirm, setModeConfirm] = useState<{ propId: string; propName: string; from: string; to: string } | null>(null);
 
   const selectedProp = PROPERTIES.find((p) => p.id === selectedPropId);
   const propUnits = selectedPropId ? UNITS.filter((u) => u.propertyId === selectedPropId) : [];
@@ -21,10 +22,16 @@ export default function PropertiesPage({ showToast }: Props) {
   const getEffectiveMode = (propId: string, defaultMode: string) =>
     modeToggles[propId] || defaultMode;
 
-  const handleModeToggle = (propId: string, currentMode: string) => {
+  const handleModeToggle = (propId: string, currentMode: string, propName: string) => {
     const next = currentMode === "LTR" ? "STR" : currentMode === "STR" ? "mixed" : "LTR";
-    setModeToggles((prev) => ({ ...prev, [propId]: next }));
-    showToast(`Mode updated to ${next}`);
+    setModeConfirm({ propId, propName, from: currentMode, to: next });
+  };
+
+  const confirmModeSwitch = () => {
+    if (!modeConfirm) return;
+    setModeToggles((prev) => ({ ...prev, [modeConfirm.propId]: modeConfirm.to }));
+    showToast(`${modeConfirm.propName} switched to ${modeConfirm.to} mode`);
+    setModeConfirm(null);
   };
 
   const modeBadge: Record<string, string> = {
@@ -68,8 +75,9 @@ export default function PropertiesPage({ showToast }: Props) {
               <div className="flex items-start justify-between mb-4">
                 <div className="text-3xl">{prop.coverImage}</div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleModeToggle(prop.id, effectiveMode); }}
+                  onClick={(e) => { e.stopPropagation(); handleModeToggle(prop.id, effectiveMode, prop.name); }}
                   className={`${modeBadge[effectiveMode]} cursor-pointer hover:opacity-80 transition-opacity`}
+                  title="Click to switch mode"
                 >
                   {effectiveMode}
                 </button>
@@ -111,6 +119,48 @@ export default function PropertiesPage({ showToast }: Props) {
           );
         })}
       </div>
+
+      {/* Mode Switch Confirmation */}
+      {modeConfirm && (
+        <div className="modal-overlay" onClick={() => setModeConfirm(null)}>
+          <div className="modal-panel max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="text-base font-semibold text-white">Switch Rental Mode</h2>
+              <button onClick={() => setModeConfirm(null)} className="btn-ghost">✕</button>
+            </div>
+            <div className="modal-body space-y-4">
+              <p className="text-sm text-gray-300">
+                Switch <span className="text-white font-semibold">{modeConfirm.propName}</span> from{" "}
+                <span className={`font-semibold ${modeConfirm.from === "LTR" ? "text-blue-400" : modeConfirm.from === "STR" ? "text-teal-400" : "text-amber-400"}`}>{modeConfirm.from}</span>{" "}
+                to{" "}
+                <span className={`font-semibold ${modeConfirm.to === "LTR" ? "text-blue-400" : modeConfirm.to === "STR" ? "text-teal-400" : "text-amber-400"}`}>{modeConfirm.to}</span>{" "}
+                mode?
+              </p>
+              <div className="space-y-2">
+                {modeConfirm.to === "STR" && (
+                  <div className="p-3 bg-teal-900/20 border border-teal-700/30 rounded-lg text-xs text-teal-300">
+                    <strong>STR Mode:</strong> Units will switch to nightly rates. Existing LTR leases remain active until expiry.
+                  </div>
+                )}
+                {modeConfirm.to === "LTR" && (
+                  <div className="p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg text-xs text-blue-300">
+                    <strong>LTR Mode:</strong> Property will accept long-term tenants. STR calendar will be paused.
+                  </div>
+                )}
+                {modeConfirm.to === "mixed" && (
+                  <div className="p-3 bg-amber-900/20 border border-amber-700/30 rounded-lg text-xs text-amber-300">
+                    <strong>Mixed Mode:</strong> Some units on STR, others on LTR. Seasonal schedule will apply.
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={confirmModeSwitch} className="btn-primary flex-1">Confirm Switch</button>
+                <button onClick={() => setModeConfirm(null)} className="btn-secondary">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Unit Detail Panel */}
       {selectedProp && (

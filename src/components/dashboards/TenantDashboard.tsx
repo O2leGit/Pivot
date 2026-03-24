@@ -140,7 +140,7 @@ export default function TenantDashboard({ user, onNavigate, showToast }: Props) 
         <div className="kpi-card cursor-pointer hover:border-navy-600 transition-colors" onClick={() => onNavigate("lease")}>
           <div className="kpi-label">Lease Ends</div>
           <div className="text-lg font-bold text-white">Aug 31</div>
-          <div className="text-xs text-gray-500">2025</div>
+          <div className="text-xs text-gray-500">2026</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Monthly Rent</div>

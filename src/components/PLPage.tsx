@@ -52,16 +52,35 @@ export default function PLPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Profit & Loss</h1>
-          <p className="page-subtitle">6-month financial summary</p>
+          <p className="page-subtitle">6-month financial summary · Oct 2025 – Mar 2026</p>
         </div>
-        <select
-          value={selectedPropId}
-          onChange={(e) => setSelectedPropId(e.target.value)}
-          className="input-field text-sm"
-        >
-          <option value="all">All Properties</option>
-          {props.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedPropId}
+            onChange={(e) => setSelectedPropId(e.target.value)}
+            className="input-field text-sm"
+          >
+            <option value="all">All Properties</option>
+            {props.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <button
+            onClick={() => {
+              const rows = ["Month,Rent,STR,Maintenance,Platform Fees,Net Income",
+                ...chartData.map(r => `${r.month},${r.rentIncome},${r.strIncome},${r.maintenance},${r.platformFees},${r.netIncome}`)
+              ].join("\n");
+              const blob = new Blob([rows], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = "pivot-pl.csv"; a.click();
+              URL.revokeObjectURL(url);
+            }}
+            className="btn-secondary text-xs flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            CSV
+          </button>
+        </div>
       </div>
 
       {/* Summary KPIs */}
@@ -96,8 +115,8 @@ export default function PLPage() {
               formatter={(v: number) => [`$${v.toLocaleString()}`, ""]}
             />
             <Legend wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }} />
-            <Bar dataKey="rentIncome" name="Rent Income" stackId="rev" fill={COLORS.teal} />
-            <Bar dataKey="strIncome" name="STR Income" stackId="rev" fill={COLORS.blue} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="rentIncome" name="Rent Income" stackId="rev" fill={COLORS.teal} isAnimationActive={false} />
+            <Bar dataKey="strIncome" name="STR Income" stackId="rev" fill={COLORS.blue} radius={[4, 4, 0, 0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -114,7 +133,7 @@ export default function PLPage() {
               contentStyle={{ background: "#1B2A4A", border: "1px solid #27426c", borderRadius: "8px", fontSize: "12px" }}
               formatter={(v: number) => [`$${v.toLocaleString()}`, "Net Income"]}
             />
-            <Line type="monotone" dataKey="netIncome" stroke={COLORS.green} strokeWidth={2.5} dot={{ fill: COLORS.green, r: 4 }} />
+            <Line type="monotone" dataKey="netIncome" stroke={COLORS.green} strokeWidth={2.5} dot={{ fill: COLORS.green, r: 4 }} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>

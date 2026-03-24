@@ -30,6 +30,7 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
   const [showNewForm, setShowNewForm] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [newRequest, setNewRequest] = useState({ title: "", description: "", urgency: "medium", category: "other" });
+  const [mockPhotos, setMockPhotos] = useState<string[]>([]);
 
   const requests = role === "tenant"
     ? MAINTENANCE_REQUESTS.filter((r) => r.tenantId === user.entityId)
@@ -50,6 +51,7 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
     showToast("Maintenance request submitted! AI triaging now…");
     setShowNewForm(false);
     setNewRequest({ title: "", description: "", urgency: "medium", category: "other" });
+    setMockPhotos([]);
   };
 
   return (
@@ -206,8 +208,36 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
                 <p className="text-xs text-teal-300 font-medium mb-1">AI Triage</p>
                 <p className="text-xs text-gray-400">After submission, our AI will automatically assess urgency, estimate costs, and match the best available contractor from our vetted pool.</p>
               </div>
-              <div className="border border-dashed border-navy-600 rounded-lg p-4 text-center text-sm text-gray-400 cursor-pointer hover:border-navy-500 transition-colors">
-                📷 Add photos (optional) — click to upload
+              {/* Photo upload */}
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5">Photos <span className="text-gray-600">(optional)</span></label>
+                <div
+                  onClick={() => {
+                    const labels = ["kitchen-faucet.jpg", "bathroom-sink.jpg", "hvac-unit.jpg", "window-crack.jpg"];
+                    const pick = labels[Math.floor(Math.random() * labels.length)];
+                    if (mockPhotos.length < 3) setMockPhotos((p) => [...p, pick]);
+                  }}
+                  className="border border-dashed border-navy-600 rounded-lg p-4 text-center cursor-pointer hover:border-teal-700/60 hover:bg-teal-900/10 transition-all"
+                >
+                  <svg className="w-6 h-6 text-gray-500 mx-auto mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <p className="text-xs text-gray-500">Click to add photo <span className="text-gray-600">(mock)</span></p>
+                </div>
+                {mockPhotos.length > 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {mockPhotos.map((p, i) => (
+                      <div key={i} className="flex items-center gap-1.5 bg-navy-800 border border-navy-700 rounded-lg px-2.5 py-1.5">
+                        <svg className="w-3 h-3 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-[10px] text-gray-300">{p}</span>
+                        <button onClick={() => setMockPhotos((prev) => prev.filter((_, j) => j !== i))} className="text-gray-600 hover:text-gray-300 ml-1">✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex gap-3">
                 <button onClick={handleSubmitRequest} className="btn-primary flex-1">Submit Request</button>

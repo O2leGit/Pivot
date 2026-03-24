@@ -193,7 +193,7 @@ export default function PaymentsPage({ role, user, showToast }: Props) {
                   <p className="text-2xl font-bold text-white">${pendingAmount.toLocaleString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-400">April 2025 Rent</p>
+                  <p className="text-xs text-gray-400">April 2026 Rent</p>
                   <p className="text-xs text-gray-500">Unit 101</p>
                 </div>
               </div>
