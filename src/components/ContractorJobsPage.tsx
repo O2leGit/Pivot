@@ -17,6 +17,24 @@ const URGENCY_BADGE: Record<string, string> = {
 };
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEK_DATES = [24, 25, 26, 27, 28, 29, 30];
+const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+const HOUR_LABEL = (h: number) => `${h <= 12 ? h : h - 12}${h < 12 ? "am" : h === 12 ? "pm" : "pm"}`;
+
+// Assign mock time slots for demo jobs
+const JOB_TIMES: Record<string, { date: number; startHour: number; durationHours: number }> = {
+  "job-001": { date: 24, startHour: 10, durationHours: 2 },  // Mon 10am–12pm
+  "job-002": { date: 25, startHour: 9,  durationHours: 3 },  // Tue 9am–12pm
+};
+
+const JOB_COLORS: Record<string, string> = {
+  plumbing:    "bg-blue-900/60 border-blue-700/60 text-blue-300",
+  electrical:  "bg-amber-900/60 border-amber-700/60 text-amber-300",
+  hvac:        "bg-purple-900/60 border-purple-700/60 text-purple-300",
+  general:     "bg-teal-900/60 border-teal-700/60 text-teal-300",
+  other:       "bg-gray-800/80 border-gray-700/60 text-gray-300",
+};
+
 const CALENDAR_JOBS = CONTRACTOR_JOBS.filter(j => j.scheduledDate);
 
 export default function ContractorJobsPage({ currentTab, onNavigate, showToast }: Props) {
@@ -60,31 +78,82 @@ export default function ContractorJobsPage({ currentTab, onNavigate, showToast }
           </div>
         </div>
 
-        {/* Calendar grid */}
-        <div className="card">
-          <div className="grid grid-cols-7 gap-1 text-xs text-gray-500 text-center mb-2">
-            {DAYS.map(d => <div key={d} className="font-medium py-1">{d}</div>)}
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {[24, 25, 26, 27, 28, 29, 30].map((day) => {
-              const job = CALENDAR_JOBS.find(j => j.scheduledDate === `2026-03-${day}`);
-              return (
-                <div
-                  key={day}
-                  className={`min-h-[80px] rounded-lg p-2 ${job ? "bg-teal-900/30 border border-teal-700/40 cursor-pointer hover:bg-teal-900/50" : "bg-navy-900/30 border border-navy-800"}`}
-                  onClick={() => job && setSelectedJob(job)}
-                >
-                  <div className={`text-xs font-semibold mb-1 ${day === 24 ? "text-teal-400" : "text-gray-400"}`}>{day}</div>
-                  {job && (
-                    <div>
-                      <p className="text-[10px] text-teal-300 font-medium leading-tight">{job.title}</p>
-                      <p className="text-[9px] text-gray-500 mt-0.5">{job.propertyName}</p>
-                      {job.accessCode && <p className="text-[9px] text-amber-400 mt-0.5">Code: {job.accessCode}</p>}
-                    </div>
-                  )}
+        {/* Time-block weekly calendar */}
+        <div className="card overflow-x-auto">
+          <div className="min-w-[560px]">
+            {/* Header row */}
+            <div className="grid gap-px mb-1" style={{ gridTemplateColumns: "52px repeat(7, 1fr)" }}>
+              <div />
+              {DAYS.map((d, i) => (
+                <div key={d} className="text-center pb-2">
+                  <div className="text-xs font-medium text-gray-400">{d}</div>
+                  <div className={`text-sm font-bold ${WEEK_DATES[i] === 24 ? "text-teal-400" : "text-gray-300"}`}>
+                    {WEEK_DATES[i]}
+                  </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            {/* Time rows */}
+            {HOURS.map((hour) => (
+              <div key={hour} className="grid gap-px" style={{ gridTemplateColumns: "52px repeat(7, 1fr)" }}>
+                <div className="text-[10px] text-gray-600 text-right pr-2 pt-1 leading-none">
+                  {HOUR_LABEL(hour)}
+                </div>
+                {WEEK_DATES.map((day) => {
+                  // Find a job that starts at this hour on this day
+                  const job = CONTRACTOR_JOBS.find(j => {
+                    const t = JOB_TIMES[j.id];
+                    return t && t.date === day && t.startHour === hour;
+                  });
+                  // Check if this cell is a continuation of a job started earlier
+                  const isContinuation = !job && CONTRACTOR_JOBS.some(j => {
+                    const t = JOB_TIMES[j.id];
+                    return t && t.date === day && t.startHour < hour && hour < t.startHour + t.durationHours;
+                  });
+                  const colorClass = job ? (JOB_COLORS[job.category] || JOB_COLORS.other) : "";
+
+                  return (
+                    <div
+                      key={day}
+                      className={`h-10 border-t border-navy-800/60 ${
+                        job
+                          ? `${colorClass} border rounded-t-md px-1.5 pt-1 cursor-pointer hover:opacity-90`
+                          : isContinuation
+                          ? "bg-blue-900/30 border-l border-r border-blue-700/40 cursor-pointer"
+                          : "hover:bg-navy-800/30"
+                      }`}
+                      onClick={() => {
+                        if (job) { setSelectedJob(job); return; }
+                        if (isContinuation) {
+                          const j = CONTRACTOR_JOBS.find(jj => {
+                            const t = JOB_TIMES[jj.id];
+                            return t && t.date === day && t.startHour < hour && hour < t.startHour + t.durationHours;
+                          });
+                          if (j) setSelectedJob(j);
+                        }
+                      }}
+                    >
+                      {job && (
+                        <div>
+                          <p className="text-[9px] font-semibold leading-tight truncate">{job.title}</p>
+                          {job.accessCode && (
+                            <p className="text-[8px] text-amber-400 font-mono leading-none mt-0.5">{job.accessCode}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-3 mt-3 pt-3 border-t border-navy-700 flex-wrap">
+            {Object.entries(JOB_COLORS).map(([cat, cls]) => (
+              <div key={cat} className="flex items-center gap-1.5">
+                <div className={`w-2.5 h-2.5 rounded-sm border ${cls}`} />
+                <span className="text-[10px] text-gray-500 capitalize">{cat}</span>
+              </div>
+            ))}
           </div>
         </div>
 

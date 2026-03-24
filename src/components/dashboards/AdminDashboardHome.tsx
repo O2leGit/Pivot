@@ -18,9 +18,9 @@ export default function AdminDashboardHome({ onNavigate, onLoginAs }: Props) {
   const criticalIoT = IOT_EVENTS.filter((e) => !e.resolved && e.severity === "critical").length;
 
   const accountsByPlan = [
-    { plan: "Starter", count: ACCOUNT_RECORDS.filter(a => a.plan === "Starter" && a.status === "active").length },
-    { plan: "Pro", count: ACCOUNT_RECORDS.filter(a => a.plan === "Pro" && a.status === "active").length },
-    { plan: "Enterprise", count: ACCOUNT_RECORDS.filter(a => a.plan === "Enterprise" && a.status === "active").length },
+    { plan: "Starter", count: ACCOUNT_RECORDS.filter(a => a.plan === "Starter").length },
+    { plan: "Pro",     count: ACCOUNT_RECORDS.filter(a => a.plan === "Pro").length },
+    { plan: "Enterprise", count: ACCOUNT_RECORDS.filter(a => a.plan === "Enterprise").length },
   ];
 
   return (

@@ -25,6 +25,23 @@ export default function TenantsPage({ onOpenChat, showToast }: Props) {
   const getScoreColor = (score: number) =>
     score >= 85 ? "text-green-400" : score >= 70 ? "text-amber-400" : "text-red-400";
 
+  const getScoreBadge = (score: number) =>
+    score >= 85
+      ? "bg-green-900/30 text-green-300 border-green-700/30"
+      : score >= 70
+      ? "bg-amber-900/30 text-amber-300 border-amber-700/30"
+      : "bg-red-900/30 text-red-300 border-red-700/30";
+
+  const getScoreLabel = (score: number) =>
+    score >= 85 ? "Approved" : score >= 70 ? "Conditional" : "Review Required";
+
+  const getAiSummary = (tenant: Tenant): string => {
+    if (tenant.screeningScore >= 90) return `Excellent credit & rental history — strong long-term tenant candidate.`;
+    if (tenant.screeningScore >= 80) return `Good credit profile, stable income verified. Minor risk factors noted.`;
+    if (tenant.screeningScore >= 70) return `Adequate history with ${tenant.autoPayEnabled ? "AutoPay enabled" : "no AutoPay"} — recommend co-signer or larger deposit.`;
+    return `Elevated risk: ${tenant.balance > 0 ? "outstanding balance" : "history gaps"}. Manual review recommended.`;
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="page-header">
@@ -99,7 +116,9 @@ export default function TenantsPage({ onOpenChat, showToast }: Props) {
                   <div className={`text-lg font-bold ${getScoreColor(tenant.screeningScore)}`}>
                     {tenant.screeningScore}
                   </div>
-                  <div className="text-[11px] text-gray-500">score</div>
+                  <div className={`text-[9px] px-1.5 py-0.5 rounded border mt-0.5 ${getScoreBadge(tenant.screeningScore)}`}>
+                    {getScoreLabel(tenant.screeningScore)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -138,11 +157,17 @@ export default function TenantsPage({ onOpenChat, showToast }: Props) {
                     style={{ width: `${selected.screeningScore}%` }}
                   />
                 </div>
-                <p className={`text-xs mt-1.5 font-medium ${getScoreColor(selected.screeningScore)}`}>
-                  {selected.screeningScore >= 85 ? "Excellent — recommended" :
-                   selected.screeningScore >= 70 ? "Good — approved with conditions" :
-                   "Fair — review required"}
-                </p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className={`text-xs px-2 py-0.5 rounded border font-medium ${getScoreBadge(selected.screeningScore)}`}>
+                    {getScoreLabel(selected.screeningScore)}
+                  </span>
+                </div>
+                <div className="mt-2 p-2 bg-teal-900/20 border border-teal-700/30 rounded-lg flex items-start gap-1.5">
+                  <svg className="w-3 h-3 text-teal-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <p className="text-[11px] text-teal-300">{getAiSummary(selected)}</p>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">

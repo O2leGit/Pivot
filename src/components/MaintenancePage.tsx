@@ -4,6 +4,33 @@ import { useState } from "react";
 import type { PortalRole, DemoUser, MaintenanceRequest } from "@/types";
 import { MAINTENANCE_REQUESTS, CONTRACTORS, TENANTS, PROPERTIES, UNITS } from "@/data/demoData";
 
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  plumbing:   ["leak", "drip", "pipe", "drain", "faucet", "toilet", "clog", "water", "sink", "shower", "bath"],
+  electrical: ["outlet", "electric", "power", "light", "switch", "breaker", "wiring", "spark", "flickering"],
+  hvac:       ["heat", "cool", "ac", "air", "hvac", "temp", "cold", "hot", "thermostat", "furnace"],
+  appliance:  ["dishwasher", "washer", "dryer", "fridge", "refrigerator", "stove", "oven", "microwave"],
+  structural: ["crack", "door", "window", "wall", "ceiling", "floor", "roof", "lock", "hinge"],
+  pest:       ["bug", "roach", "mouse", "rat", "pest", "insect", "ant", "spider", "rodent"],
+};
+
+function detectCategory(text: string): string {
+  const lower = text.toLowerCase();
+  for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (keywords.some((kw) => lower.includes(kw))) return cat;
+  }
+  return "other";
+}
+
+const AI_TRIAGE_SUMMARIES: Record<string, string> = {
+  plumbing:   "Likely plumbing issue. AI recommends dispatch within 24h to prevent water damage. Estimated cost: $120–$280.",
+  electrical: "Electrical issue detected. Safety priority — AI recommends same-day inspection. Estimated cost: $150–$400.",
+  hvac:       "HVAC/climate issue. Comfort priority — AI scheduling contractor within 48h. Estimated cost: $200–$600.",
+  appliance:  "Appliance malfunction. AI matching to nearest qualified tech. Estimated cost: $100–$350.",
+  structural: "Structural/access issue. AI triaged as medium priority. Estimated cost: $80–$250.",
+  pest:       "Pest activity detected. AI scheduling licensed exterminator. Estimated cost: $120–$300.",
+  other:      "General request received. AI reviewing for priority assignment. Estimated cost: $75–$200.",
+};
+
 interface Props {
   role: PortalRole;
   user: DemoUser;
@@ -31,10 +58,12 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
   const [filterStatus, setFilterStatus] = useState("all");
   const [newRequest, setNewRequest] = useState({ title: "", description: "", urgency: "medium", category: "other" });
   const [mockPhotos, setMockPhotos] = useState<string[]>([]);
+  const [liveRequests, setLiveRequests] = useState<MaintenanceRequest[]>([]);
 
-  const requests = role === "tenant"
+  const baseRequests = role === "tenant"
     ? MAINTENANCE_REQUESTS.filter((r) => r.tenantId === user.entityId)
     : MAINTENANCE_REQUESTS;
+  const requests = [...liveRequests, ...baseRequests];
 
   const filtered = filterStatus === "all" ? requests : requests.filter((r) => r.status === filterStatus);
 
@@ -48,7 +77,25 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
   };
   const handleSubmitRequest = () => {
     if (!newRequest.title) { showToast("Please enter a title", "error"); return; }
-    showToast("Maintenance request submitted! AI triaging now…");
+    const detectedCat = detectCategory(newRequest.title + " " + newRequest.description);
+    const cat = newRequest.category === "other" ? detectedCat : newRequest.category;
+    const newReq: MaintenanceRequest = {
+      id: `mr-live-${Date.now()}`,
+      propertyId: "p-1",
+      unitId: "u-1",
+      tenantId: user.entityId,
+      title: newRequest.title,
+      description: newRequest.description || "No additional description provided.",
+      category: cat as MaintenanceRequest["category"],
+      urgency: newRequest.urgency as MaintenanceRequest["urgency"],
+      status: "open",
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      aiTriageSummary: AI_TRIAGE_SUMMARIES[cat] ?? AI_TRIAGE_SUMMARIES.other,
+      aiUrgencyScore: newRequest.urgency === "emergency" ? 90 : newRequest.urgency === "high" ? 72 : newRequest.urgency === "medium" ? 50 : 25,
+    };
+    setLiveRequests((prev) => [newReq, ...prev]);
+    showToast("Request submitted! AI triaging now…");
     setShowNewForm(false);
     setNewRequest({ title: "", description: "", urgency: "medium", category: "other" });
     setMockPhotos([]);
@@ -165,7 +212,11 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
                   className="input-field w-full"
                   placeholder="e.g. Bathroom sink is clogged"
                   value={newRequest.title}
-                  onChange={(e) => setNewRequest((p) => ({ ...p, title: e.target.value }))}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    const detected = detectCategory(title + " " + newRequest.description);
+                    setNewRequest((p) => ({ ...p, title, category: detected }));
+                  }}
                 />
               </div>
               <div>
@@ -174,12 +225,21 @@ export default function MaintenancePage({ role, user, onOpenChat, showToast }: P
                   className="input-field w-full h-24 resize-none"
                   placeholder="Describe the issue in detail…"
                   value={newRequest.description}
-                  onChange={(e) => setNewRequest((p) => ({ ...p, description: e.target.value }))}
+                  onChange={(e) => {
+                    const desc = e.target.value;
+                    const detected = detectCategory(newRequest.title + " " + desc);
+                    setNewRequest((p) => ({ ...p, description: desc, category: detected }));
+                  }}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1.5">Category</label>
+                  <label className="block text-xs text-gray-400 mb-1.5">
+                    Category
+                    {newRequest.category !== "other" && (
+                      <span className="ml-1.5 text-teal-400 text-[10px]">✦ auto-detected</span>
+                    )}
+                  </label>
                   <select
                     className="input-field w-full"
                     value={newRequest.category}

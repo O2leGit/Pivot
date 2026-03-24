@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import type { DemoUser, PortalRole } from "@/types";
+import type { DemoUser, PortalRole, Property } from "@/types";
 import type { Page } from "../Dashboard";
 import { PROPERTIES, MAINTENANCE_REQUESTS, TENANTS, PL_DATA_P1, PL_DATA_P2, PL_DATA_P3 } from "@/data/demoData";
+import PropertyDetailModal from "../PropertyDetailModal";
 
 interface Props {
   user: DemoUser;
@@ -15,6 +17,7 @@ interface Props {
 const CHART_COLORS = { teal: "#0D9488", blue: "#3B82F6", amber: "#F59E0B", red: "#EF4444" };
 
 export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Props) {
+  const [selectedProp, setSelectedProp] = useState<Property | null>(null);
   const properties = PROPERTIES.filter((p) => p.ownerId === "o-1");
   const allUnits = properties.reduce((s, p) => s + p.totalUnits, 0);
   const occupiedUnits = properties.reduce((s, p) => s + p.occupiedUnits, 0);
@@ -165,7 +168,7 @@ export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Pr
           {properties.map((prop) => (
             <div
               key={prop.id}
-              onClick={() => onNavigate("properties")}
+              onClick={() => setSelectedProp(prop)}
               className="card-hover p-4 cursor-pointer"
             >
               <div className="flex items-start justify-between mb-3">
@@ -234,6 +237,15 @@ export default function OwnerDashboard({ onNavigate, onOpenChat, onLoginAs }: Pr
             </div>
           </div>
         </div>
+      )}
+
+      {/* Property detail modal */}
+      {selectedProp && (
+        <PropertyDetailModal
+          property={selectedProp}
+          onClose={() => setSelectedProp(null)}
+          showToast={() => {}}
+        />
       )}
 
       {/* Pending Approvals alert */}

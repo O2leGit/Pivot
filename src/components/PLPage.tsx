@@ -121,6 +121,36 @@ export default function PLPage() {
         </ResponsiveContainer>
       </div>
 
+      {/* Per-property stacked chart (all properties view only) */}
+      {selectedPropId === "all" && (
+        <div className="card">
+          <h2 className="text-sm font-semibold text-white mb-4">Net Income by Property</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart
+              data={PL_DATA_P1.map((row, i) => ({
+                month: row.month,
+                "Harlow Apts": row.netIncome,
+                "Pacific Pines": PL_DATA_P2[i].netIncome,
+                "Bayview Lofts": PL_DATA_P3[i].netIncome,
+              }))}
+              margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#27426c" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+              <Tooltip
+                contentStyle={{ background: "#1B2A4A", border: "1px solid #27426c", borderRadius: "8px", fontSize: "12px" }}
+                formatter={(v: number) => [`$${v.toLocaleString()}`, ""]}
+              />
+              <Legend wrapperStyle={{ fontSize: "11px", color: "#9ca3af" }} />
+              <Bar dataKey="Harlow Apts" stackId="a" fill={COLORS.teal} isAnimationActive={false} />
+              <Bar dataKey="Pacific Pines" stackId="a" fill={COLORS.blue} isAnimationActive={false} />
+              <Bar dataKey="Bayview Lofts" stackId="a" fill={COLORS.amber} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       {/* Net income trend */}
       <div className="card">
         <h2 className="text-sm font-semibold text-white mb-4">Net Income Trend</h2>
@@ -133,7 +163,23 @@ export default function PLPage() {
               contentStyle={{ background: "#1B2A4A", border: "1px solid #27426c", borderRadius: "8px", fontSize: "12px" }}
               formatter={(v: number) => [`$${v.toLocaleString()}`, "Net Income"]}
             />
-            <Line type="monotone" dataKey="netIncome" stroke={COLORS.green} strokeWidth={2.5} dot={{ fill: COLORS.green, r: 4 }} isAnimationActive={false} />
+            <Line
+              type="monotone"
+              dataKey="netIncome"
+              stroke={COLORS.green}
+              strokeWidth={2.5}
+              isAnimationActive={false}
+              dot={(props: { cx: number; cy: number; payload: { netIncome: number } }) => (
+                <circle
+                  key={`dot-${props.cx}`}
+                  cx={props.cx}
+                  cy={props.cy}
+                  r={4}
+                  fill={props.payload.netIncome >= 0 ? COLORS.green : COLORS.red}
+                  stroke="none"
+                />
+              )}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

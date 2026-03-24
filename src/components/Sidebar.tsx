@@ -162,21 +162,11 @@ export default function Sidebar({ role, user, currentPage, onNavigate, onLogout 
         {/* Branding */}
         {expanded && (
           <div className="pt-1 border-t border-navy-800">
-            {role === "admin" ? (
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="text-[10px] font-semibold text-gray-500">ikigaiOS</span>
-                <span className="text-[9px] text-gray-700">|</span>
-                <span className="text-[10px] font-semibold text-gray-500">ScaleOS</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                <img src="/filter-pros-logo.png" alt="Filter Pros" className="h-5 w-auto opacity-70" />
-                <div>
-                  <p className="text-[9px] text-gray-600 leading-none">Managed by</p>
-                  <p className="text-[10px] text-gray-400 font-medium leading-tight">Filter Pros, LLC</p>
-                </div>
-              </div>
-            )}
+            <div className="flex items-center justify-center gap-1.5">
+              <span className="text-[10px] font-semibold" style={{ color: brandColor }}>Pivot</span>
+              <span className="text-[9px] text-gray-700">·</span>
+              <span className="text-[10px] text-gray-600">Property OS</span>
+            </div>
           </div>
         )}
       </div>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { PortalRole } from "@/types";
+import type { PortalRole, Property } from "@/types";
 import type { Page } from "./Dashboard";
 import { PROPERTIES, UNITS, TENANTS } from "@/data/demoData";
+import PropertyDetailModal from "./PropertyDetailModal";
 
 interface Props {
   role: PortalRole;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function PropertiesPage({ showToast }: Props) {
   const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
+  const [modalProp, setModalProp] = useState<Property | null>(null);
   const [modeToggles, setModeToggles] = useState<Record<string, string>>({});
   const [modeConfirm, setModeConfirm] = useState<{ propId: string; propName: string; from: string; to: string } | null>(null);
 
@@ -70,7 +72,7 @@ export default function PropertiesPage({ showToast }: Props) {
             <div
               key={prop.id}
               className={`card cursor-pointer transition-all ${isSelected ? "border-teal-600/60 bg-navy-700/50" : "hover:border-navy-600"}`}
-              onClick={() => setSelectedPropId(isSelected ? null : prop.id)}
+              onClick={() => setModalProp(prop)}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="text-3xl">{prop.coverImage}</div>
@@ -160,6 +162,15 @@ export default function PropertiesPage({ showToast }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Property Detail Modal */}
+      {modalProp && (
+        <PropertyDetailModal
+          property={modalProp}
+          onClose={() => setModalProp(null)}
+          showToast={showToast}
+        />
       )}
 
       {/* Unit Detail Panel */}
