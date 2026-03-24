@@ -240,6 +240,13 @@ export default function Home() {
         <p className="text-center text-[11px] text-gray-600 mt-5">
           Demo environment · No real data · No backend required
         </p>
+
+        <div className="flex items-center justify-center gap-2 mt-3">
+          <span className="text-[10px] text-gray-700">Powered by</span>
+          <span className="text-[10px] font-semibold text-gray-600">ikigaiOS</span>
+          <span className="text-[9px] text-gray-700">|</span>
+          <span className="text-[10px] font-semibold text-gray-600">ScaleOS</span>
+        </div>
       </div>
     </div>
   );
